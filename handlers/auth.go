@@ -1,0 +1,87 @@
+package handlers
+
+import (
+	"go-expense-tracker-api/models"
+	"go-expense-tracker-api/repositories"
+	"go-expense-tracker-api/services"
+	"go-expense-tracker-api/utils"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+)
+
+type AuthHandler struct {
+	userRepo   *repositories.UserRepository
+	jwtService *services.JWTService
+	validator  *validator.Validate
+}
+
+func NewAuthHandler(userRepo *repositories.UserRepository, jwtService *services.JWTService) *AuthHandler {
+	return &AuthHandler{
+		userRepo:   userRepo,
+		jwtService: jwtService,
+		validator:  validator.New(),
+	}
+}
+
+// REGISTER NEW USER
+func (h *AuthHandler) Register(c *gin.Context) {
+	var req models.RegisterRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	if err := h.validator.Struct(req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// CHECK IF EMAIL ALREADY EXISTS
+	existingUser, _ := h.userRepo.GetByEmail(req.Email)
+	if existingUser != nil {
+		utils.ErrorResponse(c, http.StatusConflict, "Email already exists")
+		return
+	}
+
+	// HASH PASSWORD
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to hash password")
+		return
+	}
+
+	// CREATE NEW USER
+	user := &models.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: hashedPassword,
+	}
+
+	if err := h.userRepo.Create(*user); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create user")
+		return
+	}
+
+	// GENERATE TOKEN
+	token, err := h.jwtService.GenerateToken(user.ID, user.Email)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	response := gin.H{
+		"user": models.UserResponse{
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt,
+		},
+		"token": token,
+	}
+
+	utils.SuccessResponse(c, http.StatusCreated, "User registered successfully", response)
+}
