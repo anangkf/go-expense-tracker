@@ -11,16 +11,16 @@ type Response[T any] struct {
 	Error   string `json:"error,omitempty"`
 }
 
-func SuccessResponse(c *gin.Context, stausCode int, message string, data any) {
-	c.JSON(stausCode, Response[any]{
+func SuccessResponse(c *gin.Context, statusCode int, message string, data any) {
+	c.JSON(statusCode, Response[any]{
 		Success: true,
 		Message: message,
 		Data:    data,
 	})
 }
 
-func ErrorResponse(c *gin.Context, stausCode int, message string) {
-	c.JSON(stausCode, Response[any]{
+func ErrorResponse(c *gin.Context, statusCode int, message string) {
+	c.JSON(statusCode, Response[any]{
 		Success: false,
 		Message: "Error",
 		Error:   message,
