@@ -4,15 +4,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-	Error   string      `json:"error"`
+type Response[T any] struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Data    T      `json:"data,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
-func SuccessResponse(c *gin.Context, stausCode int, message string, data interface{}) {
-	c.JSON(stausCode, Response{
+func SuccessResponse(c *gin.Context, stausCode int, message string, data any) {
+	c.JSON(stausCode, Response[any]{
 		Success: true,
 		Message: message,
 		Data:    data,
@@ -20,7 +20,7 @@ func SuccessResponse(c *gin.Context, stausCode int, message string, data interfa
 }
 
 func ErrorResponse(c *gin.Context, stausCode int, message string) {
-	c.JSON(stausCode, Response{
+	c.JSON(stausCode, Response[any]{
 		Success: false,
 		Message: "Error",
 		Error:   message,
@@ -28,7 +28,7 @@ func ErrorResponse(c *gin.Context, stausCode int, message string) {
 }
 
 func ValidateErrorResponse(c *gin.Context, statusCode int, errors []string) {
-	c.JSON(statusCode, Response{
+	c.JSON(statusCode, Response[map[string]any]{
 		Success: false,
 		Message: "Validation Error",
 		Data:    gin.H{"errors": errors},
