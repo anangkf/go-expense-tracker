@@ -29,6 +29,12 @@ type RegisterRequest struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+// REGISTER RESPONSE
+type RegisterResponse struct {
+	User  UserResponse `json:"user"`
+	Token string       `json:"token"`
+}
+
 // USER RESPONSE
 type UserResponse struct {
 	ID        uint      `json:"id"`

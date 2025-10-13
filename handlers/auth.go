@@ -26,6 +26,18 @@ func NewAuthHandler(userRepo *repositories.UserRepository, jwtService *services.
 }
 
 // REGISTER NEW USER
+// Register godoc
+// @Summary Register users
+// @Description Create a new user account
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body models.RegisterRequest true "User registration data"
+// @Success 201 {object} utils.Response[models.RegisterResponse]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 409 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req models.RegisterRequest
 

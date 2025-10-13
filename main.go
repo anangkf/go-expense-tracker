@@ -6,13 +6,30 @@ import (
 
 	"go-expense-tracker-api/config"
 	"go-expense-tracker-api/database"
+	_ "go-expense-tracker-api/docs"
 	"go-expense-tracker-api/handlers"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Expense Tracker API
+// @version 1.0
+// @description API documentation for Expense Tracker project.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Anang
+// @contact.url http://github.com/anangkf
+// @contact.email gonanggoneng@gmail.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	// LOAD CONFIG
 	cfg := config.LoadConfig()
@@ -59,6 +76,9 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, jwtServi
 
 	// API v1
 	v1 := router.Group("/api/v1")
+
+	// SWAGGER ROUTES
+	v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// PUBLIC ROUTES
 	auth := v1.Group("/auth")
