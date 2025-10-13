@@ -97,3 +97,56 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusCreated, "User registered successfully", response)
 }
+
+// LOGIN
+// Login godoc
+// @Summary Login users
+// @Description Authenticate user
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body models.LoginRequest true "User authentication data"
+// @Success 200 {object} utils.Response[models.LoginResponse]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Router /auth/login [post]// Login godoc
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req models.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	if err := h.validator.Struct(req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// GET USER BY EMAIL
+	user, err := h.userRepo.GetByEmail(req.Email)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid email or password")
+		return
+	}
+
+	// PASSWORD VERIFICATION
+	if err := utils.CheckPassword(user.Password, req.Password); err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid email or password")
+		return
+	}
+
+	// GENERATE TOKEN
+	token, err := h.jwtService.GenerateToken(user.ID, user.Email)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate token")
+		return
+	}
+
+	response := gin.H{
+		"token": token,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Login successful", response)
+}

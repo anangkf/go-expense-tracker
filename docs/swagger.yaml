@@ -1,5 +1,20 @@
 basePath: /api/v1
 definitions:
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
   models.RegisterRequest:
     properties:
       email:
@@ -44,6 +59,17 @@ definitions:
       success:
         type: boolean
     type: object
+  utils.Response-models_LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.LoginResponse'
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   utils.Response-models_RegisterResponse:
     properties:
       data:
@@ -69,6 +95,36 @@ info:
   title: Expense Tracker API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user
+      parameters:
+      - description: User authentication data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      summary: Login users
+      tags:
+      - auth
   /auth/register:
     post:
       consumes:

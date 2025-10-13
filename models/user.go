@@ -22,6 +22,11 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+// LOGIN RESPONSE
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 // REGISTER REQUEST PAYLOAD
 type RegisterRequest struct {
 	Name     string `json:"name" validate:"required,min=2,max=100"`
