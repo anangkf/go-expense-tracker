@@ -5,10 +5,10 @@ import (
 )
 
 type Response struct {
-	Success bool        `json:success`
-	Message string      `json:message`
-	Data    interface{} `json:data`
-	Error   string      `json:error`
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+	Error   string      `json:"error"`
 }
 
 func SuccessResponse(c *gin.Context, stausCode int, message string, data interface{}) {

@@ -13,8 +13,8 @@ type JWTService struct {
 }
 
 type Claims struct {
-	UserID uint   `json:user_id`
-	Email  string `json:email`
+	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
 
