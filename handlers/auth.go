@@ -12,16 +12,18 @@ import (
 )
 
 type AuthHandler struct {
-	userRepo   *repositories.UserRepository
-	jwtService *services.JWTService
-	validator  *validator.Validate
+	userRepo     *repositories.UserRepository
+	categoryRepo *repositories.CategoryRepository
+	jwtService   *services.JWTService
+	validator    *validator.Validate
 }
 
-func NewAuthHandler(userRepo *repositories.UserRepository, jwtService *services.JWTService) *AuthHandler {
+func NewAuthHandler(userRepo *repositories.UserRepository, categoryRepo *repositories.CategoryRepository, jwtService *services.JWTService) *AuthHandler {
 	return &AuthHandler{
-		userRepo:   userRepo,
-		jwtService: jwtService,
-		validator:  validator.New(),
+		userRepo:     userRepo,
+		categoryRepo: categoryRepo,
+		jwtService:   jwtService,
+		validator:    validator.New(),
 	}
 }
 
@@ -73,8 +75,31 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Password: hashedPassword,
 	}
 
-	if err := h.userRepo.Create(*user); err != nil {
+	// GET DEFAULT CATEGORIES
+	defaultCategories, err := h.categoryRepo.GetDefaultCategories()
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to attach default categories")
+		return
+	}
+
+	if err := h.userRepo.Create(user); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create user")
+		return
+	}
+
+	// COPY DEFAULT CATEGORIES TO USER
+	var userCategories []models.Category
+	for _, dc := range *defaultCategories {
+		userCategories = append(userCategories, models.Category{
+			UserID:    &user.ID,
+			Name:      dc.Name,
+			Type:      dc.Type,
+			IsDefault: false,
+		})
+	}
+
+	if err := h.categoryRepo.CreateMany(userCategories); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create user categories")
 		return
 	}
 
@@ -87,10 +112,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	response := gin.H{
 		"user": models.UserResponse{
-			ID:        user.ID,
-			Email:     user.Email,
-			Name:      user.Name,
-			CreatedAt: user.CreatedAt,
+			ID:         user.ID,
+			Email:      user.Email,
+			Name:       user.Name,
+			CreatedAt:  user.CreatedAt,
+			Categories: userCategories,
 		},
 		"token": token,
 	}

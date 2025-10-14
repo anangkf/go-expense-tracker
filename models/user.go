@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
+	ID        uint           `json:"id" gorm:"primaryKey;autoIncrement"`
 	Email     string         `json:"email" gorm:"uniqueIndex;not null" validate:"required,email"`
 	Name      string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
 	Password  string         `json:"-" gorm:"not null" validate:"required,min=6"`
@@ -46,4 +46,7 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
+
+	// RELATIONSHIPS
+	Categories []Category `json:"categories"`
 }
