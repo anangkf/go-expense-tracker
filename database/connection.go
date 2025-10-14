@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"go-expense-tracker-api/config"
-	"go-expense-tracker-api/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -51,16 +50,4 @@ func InitDatabase(cfg *config.Config) {
 	AutoMigrate()
 
 	log.Println("Database connection successfully!")
-}
-
-func AutoMigrate() {
-	err := DB.AutoMigrate(
-		&models.User{},
-	)
-
-	if err != nil {
-		log.Fatal("Failed to migrate database:", err)
-	}
-
-	log.Println("Database migration completed!")
 }
