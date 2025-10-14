@@ -12,16 +12,18 @@ import (
 )
 
 type AuthHandler struct {
-	userRepo   *repositories.UserRepository
-	jwtService *services.JWTService
-	validator  *validator.Validate
+	userRepo     *repositories.UserRepository
+	categoryRepo *repositories.CategoryRepository
+	jwtService   *services.JWTService
+	validator    *validator.Validate
 }
 
-func NewAuthHandler(userRepo *repositories.UserRepository, jwtService *services.JWTService) *AuthHandler {
+func NewAuthHandler(userRepo *repositories.UserRepository, categoryRepo *repositories.CategoryRepository, jwtService *services.JWTService) *AuthHandler {
 	return &AuthHandler{
-		userRepo:   userRepo,
-		jwtService: jwtService,
-		validator:  validator.New(),
+		userRepo:     userRepo,
+		categoryRepo: categoryRepo,
+		jwtService:   jwtService,
+		validator:    validator.New(),
 	}
 }
 

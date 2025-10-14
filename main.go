@@ -58,9 +58,10 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	// INIT REPOSITORIES
 	userRepo := repositories.NewUserRepository(database.DB)
+	categoryRepo := repositories.NewCategoryRepository(database.DB)
 
 	// INIT HANDLERS
-	authHandler := handlers.NewAuthHandler(userRepo, jwtServices)
+	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
 
 	// SETUP ROUTES
 	setupRoutes(router, authHandler, jwtServices)

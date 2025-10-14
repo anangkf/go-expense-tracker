@@ -8,6 +8,7 @@ import (
 func AutoMigrate() {
 	err := DB.AutoMigrate(
 		&models.User{},
+		&models.Category{},
 	)
 
 	if err != nil {
