@@ -107,5 +107,6 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		category := protected.Group("/categories")
 		category.GET("/", categoryHandler.GetCategoriesByUserID)
 		category.POST("/", categoryHandler.CreateCategory)
+		category.PUT("/:id", categoryHandler.UpdateCategory)
 	}
 }

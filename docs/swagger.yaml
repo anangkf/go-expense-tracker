@@ -297,6 +297,47 @@ paths:
       summary: Create a new category
       tags:
       - categories
+  /categories/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update a category for the authenticated user
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Update a category
+      tags:
+      - categories
   /user/profile:
     get:
       consumes:

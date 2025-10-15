@@ -5,6 +5,7 @@ import (
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -126,4 +127,82 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, http.StatusCreated, "Category created successfully", response)
+}
+
+// UPDATE CATEGORY
+// UpdateCategory godoc
+// @Summary Update a category
+// @Description Update a category for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Param request body models.CategoryRequest true "Category data"
+// @Success 200 {object} utils.Response[models.Category]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/{id} [put]
+func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET CATEGORY ID FROM PATH
+	categoryID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID")
+		return
+	}
+
+	// GET CATEGORY BY ID
+	category, err := h.categoryRepo.GetByID(uint(categoryID))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusNotFound, "Category not found")
+		return
+	}
+
+	var req models.CategoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	if err := h.validator.Struct(req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// CHECK IF CATEGORY BELONGS TO USER
+	if category.UserID == nil || *category.UserID != user.ID {
+		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to update this category")
+		return
+	}
+
+	// UPDATE CATEGORY
+	category.Name = req.Name
+	category.Type = req.Type
+
+	if err := h.categoryRepo.Update(category); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to update category")
+		return
+	}
+
+	response := gin.H{
+		"category": category,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Category updated successfully", response)
 }
