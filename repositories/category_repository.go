@@ -28,3 +28,14 @@ func (r *CategoryRepository) GetDefaultCategories() (*[]models.Category, error) 
 func (r *CategoryRepository) CreateMany(categories []*models.Category) error {
 	return r.db.Create(categories).Error
 }
+
+func (r *CategoryRepository) GetByUserID(userID uint) (*[]models.Category, error) {
+	var categories []models.Category
+
+	err := r.db.Where("user_id = ?", userID).Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &categories, nil
+}

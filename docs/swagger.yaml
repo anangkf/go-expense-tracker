@@ -102,6 +102,19 @@ definitions:
       success:
         type: boolean
     type: object
+  utils.Response-array_models_Category:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   utils.Response-models_Category:
     properties:
       data:
@@ -225,6 +238,30 @@ paths:
       tags:
       - auth
   /categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_Category'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get categories by user ID
+      tags:
+      - categories
     post:
       consumes:
       - application/json

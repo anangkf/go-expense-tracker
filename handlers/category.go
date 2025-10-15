@@ -24,6 +24,47 @@ func NewCategoryHandler(categoryRepo *repositories.CategoryRepository, userRepo 
 	}
 }
 
+// GET CATEGORIES BY USER ID
+// GetCategoriesByUserID godoc
+// @Summary Get categories by user ID
+// @Description Get all categories for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} utils.Response[[]models.Category]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories [get]
+func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET CATEGORIES BY USER ID
+	categories, err := h.categoryRepo.GetByUserID(user.ID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get categories")
+		return
+	}
+
+	response := gin.H{
+		"categories": categories,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Categories retrieved successfully", response)
+}
+
 // CREATE CATEGORY
 // CreateCategory godoc
 // @Summary Create a new category
