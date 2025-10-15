@@ -38,6 +38,31 @@ definitions:
     - name
     - type
     type: object
+  models.DeleteCategoryResponse:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      is_default:
+        type: boolean
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      type:
+        enum:
+        - expense
+        - income
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    - type
+    type: object
   models.LoginRequest:
     properties:
       email:
@@ -119,6 +144,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.Category'
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_DeleteCategoryResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.DeleteCategoryResponse'
       error:
         type: string
       message:
@@ -298,6 +334,36 @@ paths:
       tags:
       - categories
   /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category for the authenticated user
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_DeleteCategoryResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Delete a category
+      tags:
+      - categories
     put:
       consumes:
       - application/json

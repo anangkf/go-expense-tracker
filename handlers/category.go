@@ -206,3 +206,60 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	utils.SuccessResponse(c, http.StatusOK, "Category updated successfully", response)
 }
+
+// DELETE CATEGORY BY ID
+// DeleteCategory godoc
+// @Summary Delete a category
+// @Description Delete a category for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Success 200 {object} utils.Response[models.DeleteCategoryResponse]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/{id} [delete]
+func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET CATEGORY ID FROM PATH
+	categoryID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID")
+		return
+	}
+
+	// GET CATEGORY BY ID
+	category, err := h.categoryRepo.GetByID(uint(categoryID))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusNotFound, "Category not found")
+		return
+	}
+
+	// CHECK IF CATEGORY BELONGS TO USER
+	if category.UserID == nil || *category.UserID != user.ID {
+		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to delete this category")
+		return
+	}
+
+	// DELETE CATEGORY
+	if err := h.categoryRepo.Delete(uint(categoryID)); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to delete category")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Category deleted successfully", category)
+}
