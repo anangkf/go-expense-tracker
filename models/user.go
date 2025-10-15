@@ -14,6 +14,9 @@ type User struct {
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// RELATIONSHIPS
+	Categories []Category `json:"categories" gorm:"foreignKey:UserID"`
 }
 
 // LOGIN REQUEST PAYLOAD

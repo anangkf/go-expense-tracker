@@ -30,7 +30,7 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 
 func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 	var user models.User
-	err := r.db.First(&user, id).Error
+	err := r.db.Preload("Categories").First(&user, id).Error
 	if err != nil {
 		return nil, err
 	}
