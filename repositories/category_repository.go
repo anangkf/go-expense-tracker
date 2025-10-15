@@ -25,6 +25,6 @@ func (r *CategoryRepository) GetDefaultCategories() (*[]models.Category, error) 
 	return &defaultCategories, nil
 }
 
-func (r *CategoryRepository) CreateMany(categories []models.Category) error {
-	return r.db.Create(&categories).Error
+func (r *CategoryRepository) CreateMany(categories []*models.Category) error {
+	return r.db.Create(categories).Error
 }

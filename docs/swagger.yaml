@@ -13,11 +13,30 @@ definitions:
         minLength: 2
         type: string
       type:
+        enum:
+        - expense
+        - income
         type: string
       updated_at:
         type: string
     required:
     - name
+    - type
+    type: object
+  models.CategoryRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      type:
+        enum:
+        - expense
+        - income
+        type: string
+    required:
+    - name
+    - type
     type: object
   models.LoginRequest:
     properties:
@@ -76,6 +95,17 @@ definitions:
   utils.Response-any:
     properties:
       data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_Category:
+    properties:
+      data:
+        $ref: '#/definitions/models.Category'
       error:
         type: string
       message:
@@ -194,6 +224,42 @@ paths:
       summary: Register users
       tags:
       - auth
+  /categories:
+    post:
+      consumes:
+      - application/json
+      description: Create a new category for the authenticated user
+      parameters:
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-models_Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create a new category
+      tags:
+      - categories
   /user/profile:
     get:
       consumes:

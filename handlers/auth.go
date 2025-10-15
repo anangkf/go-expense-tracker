@@ -88,9 +88,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// COPY DEFAULT CATEGORIES TO USER
-	var userCategories []models.Category
+	var userCategories []*models.Category
 	for _, dc := range *defaultCategories {
-		userCategories = append(userCategories, models.Category{
+		userCategories = append(userCategories, &models.Category{
 			UserID:    &user.ID,
 			Name:      dc.Name,
 			Type:      dc.Type,

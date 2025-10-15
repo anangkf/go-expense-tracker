@@ -68,14 +68,15 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
 	userHandler := handlers.NewUserHandler(userRepo)
+	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, jwtServices)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, jwtServices)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, jwtService *services.JWTService) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, jwtService *services.JWTService) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -101,5 +102,9 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		// USER ROUTES
 		user := protected.Group("/user")
 		user.GET("/profile", userHandler.GetUserProfile)
+
+		// CATEGORY ROUTES
+		category := protected.Group("/categories")
+		category.POST("/", categoryHandler.CreateCategory)
 	}
 }

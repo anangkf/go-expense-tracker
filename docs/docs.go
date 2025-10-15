@@ -122,6 +122,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/categories": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new category for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Create a new category",
+                "parameters": [
+                    {
+                        "description": "Category data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
         "/user/profile": {
             "get": {
                 "security": [
@@ -173,7 +230,8 @@ const docTemplate = `{
         "models.Category": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "type"
             ],
             "properties": {
                 "created_at": {
@@ -191,10 +249,35 @@ const docTemplate = `{
                     "minLength": 2
                 },
                 "type": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "expense",
+                        "income"
+                    ]
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "models.CategoryRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "expense",
+                        "income"
+                    ]
                 }
             }
         },
@@ -282,6 +365,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-models_Category": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.Category"
+                },
                 "error": {
                     "type": "string"
                 },

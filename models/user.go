@@ -51,5 +51,5 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 
 	// RELATIONSHIPS
-	Categories []Category `json:"categories"`
+	Categories []*Category `json:"categories"`
 }
