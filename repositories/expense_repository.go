@@ -17,7 +17,7 @@ func NewExpenseRepository(db *gorm.DB) *ExpenseRepository {
 func (r *ExpenseRepository) GetByUserID(userID uint) (*[]models.Expense, error) {
 	var expenses []models.Expense
 
-	err := r.db.Where("user_id = ?", userID).Find(&expenses).Error
+	err := r.db.Preload("Category").Where("user_id = ?", userID).Find(&expenses).Error
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (r *ExpenseRepository) Create(expense *models.Expense) error {
 func (r *ExpenseRepository) GetByID(id uint) (*models.Expense, error) {
 	var expense models.Expense
 
-	err := r.db.Where("id = ?", id).First(&expense).Error
+	err := r.db.Preload("Category").Where("id = ?", id).First(&expense).Error
 	if err != nil {
 		return nil, err
 	}
