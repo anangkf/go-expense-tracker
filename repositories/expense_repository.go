@@ -28,3 +28,14 @@ func (r *ExpenseRepository) GetByUserID(userID uint) (*[]models.Expense, error) 
 func (r *ExpenseRepository) Create(expense *models.Expense) error {
 	return r.db.Create(expense).Error
 }
+
+func (r *ExpenseRepository) GetByID(id uint) (*models.Expense, error) {
+	var expense models.Expense
+
+	err := r.db.Where("id = ?", id).First(&expense).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &expense, nil
+}

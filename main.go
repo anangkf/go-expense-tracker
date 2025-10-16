@@ -115,6 +115,7 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		// EXPENSE ROUTES
 		expense := protected.Group("/expenses")
 		expense.GET("/", expenseHandler.GetExpensesByUserID)
+		expense.GET("/:id", expenseHandler.GetExpenseByID)
 		expense.POST("/", expenseHandler.CreateExpense)
 	}
 }
