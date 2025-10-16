@@ -8,6 +8,7 @@ import (
 	"go-expense-tracker-api/database"
 	_ "go-expense-tracker-api/docs"
 	"go-expense-tracker-api/handlers"
+	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 
@@ -20,6 +21,10 @@ import (
 // @version 1.0
 // @description API documentation for Expense Tracker project.
 // @termsOfService http://swagger.io/terms/
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 // @contact.name Anang
 // @contact.url http://github.com/anangkf
@@ -59,17 +64,21 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	// INIT REPOSITORIES
 	userRepo := repositories.NewUserRepository(database.DB)
 	categoryRepo := repositories.NewCategoryRepository(database.DB)
+	expenseRepo := repositories.NewExpenseRepository(database.DB)
 
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
+	userHandler := handlers.NewUserHandler(userRepo)
+	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
+	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, jwtServices)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, jwtService *services.JWTService) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -86,5 +95,29 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, jwtServi
 	{
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
+	}
+
+	// PROTECTED ROUTES
+	protected := v1.Group("/")
+	protected.Use(middleware.AuthMiddleware((jwtService)))
+	{
+		// USER ROUTES
+		user := protected.Group("/user")
+		user.GET("/profile", userHandler.GetUserProfile)
+
+		// CATEGORY ROUTES
+		category := protected.Group("/categories")
+		category.GET("/", categoryHandler.GetCategoriesByUserID)
+		category.POST("/", categoryHandler.CreateCategory)
+		category.PUT("/:id", categoryHandler.UpdateCategory)
+		category.DELETE("/:id", categoryHandler.DeleteCategory)
+
+		// EXPENSE ROUTES
+		expense := protected.Group("/expenses")
+		expense.GET("/", expenseHandler.GetExpensesByUserID)
+		expense.GET("/:id", expenseHandler.GetExpenseByID)
+		expense.POST("/", expenseHandler.CreateExpense)
+		expense.PUT("/:id", expenseHandler.UpdateExpense)
+		expense.DELETE("/:id", expenseHandler.DeleteExpense)
 	}
 }

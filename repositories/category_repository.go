@@ -25,6 +25,36 @@ func (r *CategoryRepository) GetDefaultCategories() (*[]models.Category, error) 
 	return &defaultCategories, nil
 }
 
-func (r *CategoryRepository) CreateMany(categories []models.Category) error {
-	return r.db.Create(&categories).Error
+func (r *CategoryRepository) CreateMany(categories []*models.Category) error {
+	return r.db.Create(categories).Error
+}
+
+func (r *CategoryRepository) GetByUserID(userID uint) (*[]models.Category, error) {
+	var categories []models.Category
+
+	err := r.db.Where("user_id = ?", userID).Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &categories, nil
+}
+
+func (r *CategoryRepository) GetByID(categoryID uint) (*models.Category, error) {
+	var category models.Category
+
+	err := r.db.Where("id = ?", categoryID).First(&category).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
+}
+
+func (r *CategoryRepository) Update(category *models.Category) error {
+	return r.db.Save(category).Error
+}
+
+func (r *CategoryRepository) Delete(categoryID uint) error {
+	return r.db.Delete(&models.Category{}, categoryID).Error
 }
