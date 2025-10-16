@@ -46,9 +46,5 @@ func (h *UserHandler) GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	response := gin.H{
-		"user": user,
-	}
-
-	utils.SuccessResponse(c, http.StatusOK, "User profile retrieved successfully", response)
+	utils.SuccessResponse(c, http.StatusOK, "User profile retrieved successfully", user)
 }

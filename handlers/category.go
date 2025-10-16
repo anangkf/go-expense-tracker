@@ -59,11 +59,7 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 		return
 	}
 
-	response := gin.H{
-		"categories": categories,
-	}
-
-	utils.SuccessResponse(c, http.StatusOK, "Categories retrieved successfully", response)
+	utils.SuccessResponse(c, http.StatusOK, "Categories retrieved successfully", categories)
 }
 
 // CREATE CATEGORY
@@ -122,11 +118,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	response := gin.H{
-		"category": categories[0],
-	}
-
-	utils.SuccessResponse(c, http.StatusCreated, "Category created successfully", response)
+	utils.SuccessResponse(c, http.StatusCreated, "Category created successfully", categories[0])
 }
 
 // UPDATE CATEGORY
@@ -200,11 +192,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	response := gin.H{
-		"category": category,
-	}
-
-	utils.SuccessResponse(c, http.StatusOK, "Category updated successfully", response)
+	utils.SuccessResponse(c, http.StatusOK, "Category updated successfully", category)
 }
 
 // DELETE CATEGORY BY ID
