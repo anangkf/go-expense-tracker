@@ -24,3 +24,7 @@ func (r *ExpenseRepository) GetByUserID(userID uint) (*[]models.Expense, error) 
 
 	return &expenses, nil
 }
+
+func (r *ExpenseRepository) Create(expense *models.Expense) error {
+	return r.db.Create(expense).Error
+}

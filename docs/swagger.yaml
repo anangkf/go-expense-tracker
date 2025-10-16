@@ -82,6 +82,18 @@ definitions:
       user_id:
         type: integer
     type: object
+  models.ExpenseRequest:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      name:
+        type: string
+    required:
+    - amount
+    - name
+    type: object
   models.LoginRequest:
     properties:
       email:
@@ -187,6 +199,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.DeleteCategoryResponse'
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_Expense:
+    properties:
+      data:
+        $ref: '#/definitions/models.Expense'
       error:
         type: string
       message:
@@ -459,6 +482,41 @@ paths:
       security:
       - BearerAuth: []
       summary: Get expenses by user ID
+      tags:
+      - expenses
+    post:
+      consumes:
+      - application/json
+      description: Create a new expense for the authenticated user
+      parameters:
+      - description: Expense data
+        in: body
+        name: expense
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-models_Expense'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create a new expense
       tags:
       - expenses
   /user/profile:

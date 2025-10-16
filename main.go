@@ -70,7 +70,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
-	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo)
+	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
 
 	// SETUP ROUTES
 	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices)
@@ -115,5 +115,6 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		// EXPENSE ROUTES
 		expense := protected.Group("/expenses")
 		expense.GET("/", expenseHandler.GetExpensesByUserID)
+		expense.POST("/", expenseHandler.CreateExpense)
 	}
 }

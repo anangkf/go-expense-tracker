@@ -12,3 +12,9 @@ type Expense struct {
 	UpdatedAt  time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt  time.Time `json:"deleted_at" gorm:"index"`
 }
+
+type ExpenseRequest struct {
+	Name       string  `json:"name" validate:"required"`
+	Amount     float64 `json:"amount" validate:"required,gt=0"`
+	CategoryID uint    `json:"category_id" gorm:"foreignKey:CategoryID;references:ID"`
+}
