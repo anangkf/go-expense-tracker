@@ -64,19 +64,21 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	// INIT REPOSITORIES
 	userRepo := repositories.NewUserRepository(database.DB)
 	categoryRepo := repositories.NewCategoryRepository(database.DB)
+	expenseRepo := repositories.NewExpenseRepository(database.DB)
 
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
+	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, categoryHandler, jwtServices)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, jwtService *services.JWTService) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -109,5 +111,9 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		category.POST("/", categoryHandler.CreateCategory)
 		category.PUT("/:id", categoryHandler.UpdateCategory)
 		category.DELETE("/:id", categoryHandler.DeleteCategory)
+
+		// EXPENSE ROUTES
+		expense := protected.Group("/expenses")
+		expense.GET("/", expenseHandler.GetExpensesByUserID)
 	}
 }

@@ -63,6 +63,25 @@ definitions:
     - name
     - type
     type: object
+  models.Expense:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   models.LoginRequest:
     properties:
       email:
@@ -132,6 +151,19 @@ definitions:
       data:
         items:
           $ref: '#/definitions/models.Category'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-array_models_Expense:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Expense'
         type: array
       error:
         type: string
@@ -404,6 +436,31 @@ paths:
       summary: Update a category
       tags:
       - categories
+  /expenses:
+    get:
+      consumes:
+      - application/json
+      description: Get all expenses for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_Expense'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get expenses by user ID
+      tags:
+      - expenses
   /user/profile:
     get:
       consumes:
