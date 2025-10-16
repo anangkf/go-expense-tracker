@@ -39,3 +39,7 @@ func (r *ExpenseRepository) GetByID(id uint) (*models.Expense, error) {
 
 	return &expense, nil
 }
+
+func (r *ExpenseRepository) Update(expense *models.Expense) error {
+	return r.db.Save(expense).Error
+}

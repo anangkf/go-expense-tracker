@@ -67,8 +67,10 @@ definitions:
     properties:
       amount:
         type: number
-      category_id:
-        type: integer
+      category:
+        allOf:
+        - $ref: '#/definitions/models.Category'
+        description: RELATIONSHIPS
       created_at:
         type: string
       deleted_at:
@@ -79,8 +81,6 @@ definitions:
         type: string
       updated_at:
         type: string
-      user_id:
-        type: integer
     type: object
   models.ExpenseRequest:
     properties:
@@ -556,6 +556,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Get an expense by ID
+      tags:
+      - expenses
+    put:
+      consumes:
+      - application/json
+      description: Update an expense for the authenticated user
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Expense data
+        in: body
+        name: expense
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_Expense'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Update an expense
       tags:
       - expenses
   /user/profile:
