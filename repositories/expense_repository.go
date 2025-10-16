@@ -43,3 +43,7 @@ func (r *ExpenseRepository) GetByID(id uint) (*models.Expense, error) {
 func (r *ExpenseRepository) Update(expense *models.Expense) error {
 	return r.db.Save(expense).Error
 }
+
+func (r *ExpenseRepository) Delete(expense *models.Expense) error {
+	return r.db.Delete(&expense).Error
+}

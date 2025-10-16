@@ -289,3 +289,62 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	// RETURN UPDATED EXPENSE
 	utils.SuccessResponse(c, http.StatusOK, "Expense updated successfully", expense)
 }
+
+// DELETE EXPENSE
+// DeleteExpense godoc
+// @Summary Delete an expense
+// @Description Delete an expense for the authenticated user
+// @Tags expenses
+// @Accept  json
+// @Produce  json
+// @Param   id  path  int  true  "Expense ID"
+// @Success 200 {object} utils.Response[models.Expense]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /expenses/{id} [delete]
+func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET EXPENSE ID FROM URL PARAM
+	expenseID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid expense ID")
+		return
+	}
+
+	// GET EXPENSE BY ID
+	expense, err := h.expenseRepo.GetByID(uint(expenseID))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusNotFound, "Expense not found")
+		return
+	}
+
+	// CHECK IF EXPENSE BELONGS TO USER
+	if expense.UserID != user.ID {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Expense does not belong to this user")
+		return
+	}
+
+	// DELETE EXPENSE
+	if err := h.expenseRepo.Delete(expense); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to delete expense")
+		return
+	}
+
+	// RETURN SUCCESS MESSAGE
+	utils.SuccessResponse(c, http.StatusOK, "Expense deleted successfully", expense)
+}
