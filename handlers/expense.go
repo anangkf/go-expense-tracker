@@ -136,6 +136,9 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 		return
 	}
 
+	// SET CATEGORY TO EXPENSE STRUCT MANUALLY
+	expense.Category = *category
+
 	// RETURN CREATED EXPENSE
 	utils.SuccessResponse(c, http.StatusCreated, "Expense created successfully", expense)
 }
