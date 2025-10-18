@@ -11,6 +11,18 @@ type Response[T any] struct {
 	Error   string `json:"error,omitempty"`
 }
 
+type PaginationResponse[T any] struct {
+	Data       T     `json:"data"`
+	Total      int64 `json:"total"`
+	Page       int   `json:"page"`
+	Limit      int   `json:"limit"`
+	TotalPages int   `json:"total_pages"`
+}
+
+type ResponseWithPagination[T any] struct {
+	Response[PaginationResponse[T]]
+}
+
 func SuccessResponse(c *gin.Context, statusCode int, message string, data any) {
 	c.JSON(statusCode, Response[any]{
 		Success: true,

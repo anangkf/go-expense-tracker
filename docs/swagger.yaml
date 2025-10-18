@@ -148,22 +148,24 @@ definitions:
       name:
         type: string
     type: object
-  utils.Response-any:
-    properties:
-      data: {}
-      error:
-        type: string
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  utils.Response-array_models_Category:
+  utils.PaginationResponse-array_models_Category:
     properties:
       data:
         items:
           $ref: '#/definitions/models.Category'
         type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  utils.Response-any:
+    properties:
+      data: {}
       error:
         type: string
       message:
@@ -243,6 +245,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.UserResponse'
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.ResponseWithPagination-array_models_Category:
+    properties:
+      data:
+        $ref: '#/definitions/utils.PaginationResponse-array_models_Category'
       error:
         type: string
       message:
@@ -333,13 +346,42 @@ paths:
       consumes:
       - application/json
       description: Get all categories for the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: asc
+        description: Sort order (asc or desc)
+        in: query
+        name: order
+        type: string
+      - description: Filter by category name
+        in: query
+        name: name
+        type: string
+      - description: Filter by category type
+        in: query
+        name: type
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/utils.Response-array_models_Category'
+            $ref: '#/definitions/utils.ResponseWithPagination-array_models_Category'
         "401":
           description: Unauthorized
           schema:
