@@ -17,6 +17,13 @@ type Expense struct {
 	DeletedAt time.Time `json:"deleted_at" gorm:"index"`
 }
 
+type ExpenseReponse struct {
+	Expense
+	Total int64 `json:"total,omitempty"`
+	Page  int   `json:"page,omitempty"`
+	Limit int   `json:"limit,omitempty"`
+}
+
 type ExpenseRequest struct {
 	Name       string  `json:"name" validate:"required"`
 	Amount     float64 `json:"amount" validate:"required,gt=0"`

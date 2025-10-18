@@ -140,11 +140,53 @@ const docTemplate = `{
                     "categories"
                 ],
                 "summary": "Get categories by user ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "id",
+                        "description": "Sort by field",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Sort order (asc or desc)",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category type",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response-array_models_Category"
+                            "$ref": "#/definitions/utils.ResponseWithPagination-array_models_Category"
                         }
                     },
                     "401": {
@@ -346,11 +388,59 @@ const docTemplate = `{
                     "expenses"
                 ],
                 "summary": "Get expenses by user ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "id",
+                        "description": "Sort by field",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Sort order (asc or desc)",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by expense name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category name",
+                        "name": "category_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category type",
+                        "name": "category_type",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response-array_models_Expense"
+                            "$ref": "#/definitions/utils.ResponseWithPagination-array_models_Expense"
                         }
                     },
                     "401": {
@@ -866,22 +956,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.Response-any": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "utils.Response-array_models_Category": {
+        "utils.PaginationResponse-array_models_Category": {
             "type": "object",
             "properties": {
                 "data": {
@@ -890,18 +965,21 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Category"
                     }
                 },
-                "error": {
-                    "type": "string"
+                "limit": {
+                    "type": "integer"
                 },
-                "message": {
-                    "type": "string"
+                "page": {
+                    "type": "integer"
                 },
-                "success": {
-                    "type": "boolean"
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
                 }
             }
         },
-        "utils.Response-array_models_Expense": {
+        "utils.PaginationResponse-array_models_Expense": {
             "type": "object",
             "properties": {
                 "data": {
@@ -910,6 +988,24 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.Expense"
                     }
                 },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.Response-any": {
+            "type": "object",
+            "properties": {
+                "data": {},
                 "error": {
                     "type": "string"
                 },
@@ -1011,6 +1107,40 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/models.UserResponse"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.ResponseWithPagination-array_models_Category": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/utils.PaginationResponse-array_models_Category"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.ResponseWithPagination-array_models_Expense": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/utils.PaginationResponse-array_models_Expense"
                 },
                 "error": {
                     "type": "string"

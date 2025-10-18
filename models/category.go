@@ -17,6 +17,13 @@ type Category struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+type CategoryReponse struct {
+	Category
+	Total int64 `json:"total,omitempty"`
+	Page  int   `json:"page,omitempty"`
+	Limit int   `json:"limit,omitempty"`
+}
+
 type CategoryRequest struct {
 	Name string `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
 	Type string `json:"type" gorm:"not null" validate:"required,oneof=expense income"`

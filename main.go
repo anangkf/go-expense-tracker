@@ -100,6 +100,7 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 	// PROTECTED ROUTES
 	protected := v1.Group("/")
 	protected.Use(middleware.AuthMiddleware((jwtService)))
+	protected.Use(middleware.PaginationAndFilter())
 	{
 		// USER ROUTES
 		user := protected.Group("/user")
