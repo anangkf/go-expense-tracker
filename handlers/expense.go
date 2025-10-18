@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
@@ -34,7 +35,14 @@ func NewExpenseHandler(expenseRepo *repositories.ExpenseRepository, userRepo *re
 // @Tags expenses
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} utils.Response[[]models.Expense]
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Number of items per page" default(10)
+// @Param sortBy query string false "Sort by field" default(id)
+// @Param order query string false "Sort order (asc or desc)" default(asc)
+// @Param name query string false "Filter by expense name"
+// @Param category_name query string false "Filter by category name"
+// @Param category_type query string false "Filter by category type"
+// @Success 200 {object} utils.ResponseWithPagination[[]models.Expense]
 // @Failure 401 {object} utils.Response[any]
 // @Failure 500 {object} utils.Response[any]
 // @Security BearerAuth
@@ -54,15 +62,26 @@ func (h *ExpenseHandler) GetExpensesByUserID(c *gin.Context) {
 		return
 	}
 
+	// GET QUERY PARAMETERS
+	queryParams, _ := c.Get("queryParams")
+
 	// GET EXPENSES BY USER ID
-	expenses, err := h.expenseRepo.GetByUserID(user.ID)
+	expenses, total, totalPages, err := h.expenseRepo.GetByUserID(user.ID, queryParams.(middleware.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get expenses")
 		return
 	}
 
+	response := gin.H{
+		"data":        expenses,
+		"total":       total,
+		"page":        queryParams.(middleware.QueryParams).Page,
+		"limit":       queryParams.(middleware.QueryParams).Limit,
+		"total_pages": totalPages,
+	}
+
 	// RETURN EXPENSES
-	utils.SuccessResponse(c, http.StatusOK, "Expenses retrieved successfully", expenses)
+	utils.SuccessResponse(c, http.StatusOK, "Expenses retrieved successfully", response)
 }
 
 // CREATE EXPENSE

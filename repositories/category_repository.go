@@ -40,7 +40,7 @@ func (r *CategoryRepository) GetByUserID(userID uint, queryParams middleware.Que
 	// APPLY FILTERS
 	for key, value := range queryParams.Filters {
 		if value != "" {
-			query = query.Where(key+" LIKE ?", "%"+value+"%")
+			query = query.Where(key+" ILIKE ?", "%"+value+"%")
 		}
 	}
 
