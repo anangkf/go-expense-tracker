@@ -27,7 +27,8 @@ type LoginRequest struct {
 
 // LOGIN RESPONSE
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // REGISTER REQUEST PAYLOAD
@@ -39,8 +40,20 @@ type RegisterRequest struct {
 
 // REGISTER RESPONSE
 type RegisterResponse struct {
-	User  UserResponse `json:"user"`
-	Token string       `json:"token"`
+	User         UserResponse `json:"user"`
+	Token        string       `json:"token"`
+	RefreshToken string       `json:"refresh_token"`
+}
+
+// REFRESH TOKEN REQUEST PAYLOAD
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
+// REFRESH TOKEN RESPONSE
+type RefreshTokenResponse struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // USER RESPONSE

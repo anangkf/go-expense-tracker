@@ -10,6 +10,7 @@ func AutoMigrate() {
 		&models.User{},
 		&models.Category{},
 		&models.Expense{},
+		&models.RefreshToken{},
 	)
 
 	if err != nil {

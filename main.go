@@ -65,9 +65,10 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	userRepo := repositories.NewUserRepository(database.DB)
 	categoryRepo := repositories.NewCategoryRepository(database.DB)
 	expenseRepo := repositories.NewExpenseRepository(database.DB)
+	refreshTokenRepo := repositories.NewRefreshTokenRepository(database.DB)
 
 	// INIT HANDLERS
-	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, jwtServices)
+	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, jwtServices)
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
@@ -95,6 +96,8 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 	{
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
+		auth.POST("/refresh-token", authHandler.RefreshToken)
+		auth.POST("/logout", middleware.AuthMiddleware(jwtService), authHandler.Logout)
 	}
 
 	// PROTECTED ROUTES

@@ -9,7 +9,7 @@ import (
 )
 
 type JWTService struct {
-	config *config.Config
+	Config *config.Config
 }
 
 type Claims struct {
@@ -20,25 +20,50 @@ type Claims struct {
 
 func NewJWTService(cfg *config.Config) *JWTService {
 	return &JWTService{
-		config: cfg,
+		Config: cfg,
 	}
 }
 
 // GENERATE JWT TOKEN
-func (j *JWTService) GenerateToken(userID uint, email string) (string, error) {
-	expirationTime := time.Now().Add(time.Duration(j.config.JWT.ExpireHours) * time.Hour)
+func (j *JWTService) GenerateToken(userID uint, email string, jti string) (string, error) {
+	expirationTime := time.Now().Add(time.Duration(j.Config.JWT.ExpireHours) * time.Hour)
 
 	claims := &Claims{
 		UserID: userID,
 		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        jti,
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(j.config.JWT.Secret))
+	tokenString, err := token.SignedString([]byte(j.Config.JWT.Secret))
+
+	if err != nil {
+		return "", nil
+	}
+
+	return tokenString, nil
+}
+
+// GENERATE REFRESH TOKEN
+func (j *JWTService) GenerateRefreshToken(userID uint, email string, jti string) (string, error) {
+	expirationTime := time.Now().Add(time.Duration(j.Config.JWT.RefreshExpireHours) * time.Hour)
+
+	claims := &Claims{
+		UserID: userID,
+		Email:  email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        jti,
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(j.Config.JWT.RefreshSecret))
 
 	if err != nil {
 		return "", nil
@@ -52,7 +77,7 @@ func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(j.config.JWT.Secret), nil
+		return []byte(j.Config.JWT.Secret), nil
 	})
 
 	if err != nil {
@@ -61,6 +86,24 @@ func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 
 	if !token.Valid {
 		return nil, errors.New("Invalid token")
+	}
+
+	return claims, nil
+}
+
+func (j *JWTService) ValidateRefreshToken(tokenString string) (*Claims, error) {
+	claims := &Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(j.Config.JWT.RefreshSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("Invalid refresh token")
 	}
 
 	return claims, nil
