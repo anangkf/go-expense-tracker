@@ -5,25 +5,30 @@ import (
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 	"go-expense-tracker-api/utils"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
-	userRepo     *repositories.UserRepository
-	categoryRepo *repositories.CategoryRepository
-	jwtService   *services.JWTService
-	validator    *validator.Validate
+	userRepo         *repositories.UserRepository
+	categoryRepo     *repositories.CategoryRepository
+	refreshTokenRepo *repositories.RefreshTokenRepository
+	jwtService       *services.JWTService
+	validator        *validator.Validate
 }
 
-func NewAuthHandler(userRepo *repositories.UserRepository, categoryRepo *repositories.CategoryRepository, jwtService *services.JWTService) *AuthHandler {
+func NewAuthHandler(userRepo *repositories.UserRepository, categoryRepo *repositories.CategoryRepository, refreshTokenRepo *repositories.RefreshTokenRepository, jwtService *services.JWTService) *AuthHandler {
 	return &AuthHandler{
-		userRepo:     userRepo,
-		categoryRepo: categoryRepo,
-		jwtService:   jwtService,
-		validator:    validator.New(),
+		userRepo:         userRepo,
+		categoryRepo:     categoryRepo,
+		refreshTokenRepo: refreshTokenRepo,
+		jwtService:       jwtService,
+		validator:        validator.New(),
 	}
 }
 
@@ -75,50 +80,49 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		Password: hashedPassword,
 	}
 
-	// GET DEFAULT CATEGORIES
-	defaultCategories, err := h.categoryRepo.GetDefaultCategories()
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to attach default categories")
-		return
-	}
-
 	if err := h.userRepo.Create(user); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
 
-	// COPY DEFAULT CATEGORIES TO USER
-	var userCategories []*models.Category
-	for _, dc := range *defaultCategories {
-		userCategories = append(userCategories, &models.Category{
-			UserID:    &user.ID,
-			Name:      dc.Name,
-			Type:      dc.Type,
-			IsDefault: false,
-		})
-	}
-
-	if err := h.categoryRepo.CreateMany(userCategories); err != nil {
-		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create user categories")
-		return
-	}
+	jti := uuid.New().String()
 
 	// GENERATE TOKEN
-	token, err := h.jwtService.GenerateToken(user.ID, user.Email)
+	token, err := h.jwtService.GenerateToken(user.ID, user.Email, jti)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
 
+	// GENERATE REFRESH TOKEN
+	refreshToken, err := h.jwtService.GenerateRefreshToken(user.ID, user.Email, jti)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate refresh token")
+		return
+	}
+
+	// SAVE REFRESH TOKEN TO DATABASE
+	rt := &models.RefreshToken{
+		UserID:    user.ID,
+		JTI:       jti,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(time.Duration(h.jwtService.Config.JWT.RefreshExpireHours) * time.Hour),
+	}
+
+	if err := h.refreshTokenRepo.Create(rt); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to save refresh token")
+		return
+	}
+
 	response := gin.H{
 		"user": models.UserResponse{
-			ID:         user.ID,
-			Email:      user.Email,
-			Name:       user.Name,
-			CreatedAt:  user.CreatedAt,
-			Categories: userCategories,
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			CreatedAt: user.CreatedAt,
 		},
-		"token": token,
+		"token":         token,
+		"refresh_token": refreshToken,
 	}
 
 	utils.SuccessResponse(c, http.StatusCreated, "User registered successfully", response)
@@ -163,16 +167,166 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// GENERATE TOKEN
-	token, err := h.jwtService.GenerateToken(user.ID, user.Email)
+	// GENERATE JWT ID
+	jti := uuid.New().String()
+
+	// GENERATE ACCESS TOKEN
+	token, err := h.jwtService.GenerateToken(user.ID, user.Email, jti)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate token")
 		return
 	}
 
+	// GENERATE REFRESH TOKEN
+	refreshToken, err := h.jwtService.GenerateRefreshToken(user.ID, user.Email, jti)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate refresh token")
+		return
+	}
+	log.Println(h.jwtService.Config.JWT.RefreshExpireHours)
+	// SAVE REFRESH TOKEN TO DATABASE
+	rt := &models.RefreshToken{
+		UserID:    user.ID,
+		JTI:       jti,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(time.Duration(h.jwtService.Config.JWT.RefreshExpireHours) * time.Hour),
+	}
+
+	if err := h.refreshTokenRepo.Create(rt); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to save refresh token")
+		return
+	}
+
 	response := gin.H{
-		"token": token,
+		"token":         token,
+		"refresh_token": refreshToken,
 	}
 
 	utils.SuccessResponse(c, http.StatusOK, "Login successful", response)
+}
+
+// REFRESH TOKEN
+// RefreshToken godoc
+// @Summary Refresh access token using refresh token
+// @Description Refresh access token using refresh token
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body models.RefreshTokenRequest true "Refresh token request data"
+// @Success 200 {object} utils.Response[models.RefreshTokenResponse]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Router /auth/refresh-token [post]
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var req models.RefreshTokenRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	if err := h.validator.Struct(req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// VALIDATE REFRESH TOKEN
+	claims, err := h.jwtService.ValidateRefreshToken(req.RefreshToken)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid or expired refresh token")
+		return
+	}
+
+	// CHECK IF REFRESH TOKEN EXISTS IN DATABASE AND IS NOT REVOKED
+	storedToken, err := h.refreshTokenRepo.GetByJTI(claims.ID)
+	if err != nil || storedToken.Token != req.RefreshToken {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Refresh token not found, has been revoked, or already used")
+		return
+	}
+
+	// REVOKE OLD REFRESH TOKEN
+	if _, err := h.refreshTokenRepo.RevokeByJTI(storedToken.JTI); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to revoke old refresh token")
+		return
+	}
+
+	// GET USER
+	user, err := h.userRepo.GetByID(claims.UserID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not found")
+		return
+	}
+
+	// GENERATE NEW JTI FOR ROTATION
+	newJti := uuid.New().String()
+
+	// GENERATE NEW ACCESS TOKEN
+	newToken, err := h.jwtService.GenerateToken(user.ID, user.Email, newJti)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate new access token")
+		return
+	}
+
+	// GENERATE NEW REFRESH TOKEN
+	newRefreshToken, err := h.jwtService.GenerateRefreshToken(user.ID, user.Email, newJti)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate new refresh token")
+		return
+	}
+
+	// SAVE NEW REFRESH TOKEN TO DATABASE
+	rt := &models.RefreshToken{
+		UserID:    user.ID,
+		JTI:       newJti,
+		Token:     newRefreshToken,
+		ExpiresAt: time.Now().Add(time.Duration(h.jwtService.Config.JWT.RefreshExpireHours) * time.Hour),
+	}
+
+	if err := h.refreshTokenRepo.Create(rt); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to save new refresh token")
+		return
+	}
+
+	response := gin.H{
+		"token":         newToken,
+		"refresh_token": newRefreshToken,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Token refreshed successfully", response)
+}
+
+// LOGOUT
+// Logout godoc
+// @Summary Logout user
+// @Description Logout user by revoking refresh token
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /auth/logout [post]
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// GET JTI FROM CONTEXT (SET BY AUTH MIDDLEWARE)
+	jti, exists := c.Get("jti")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Token ID not found in token")
+		return
+	}
+
+	// REVOKE REFRESH TOKEN BY JTI
+	revokedCount, err := h.refreshTokenRepo.RevokeByJTI(jti.(string))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to logout")
+		return
+	}
+
+	if revokedCount == 0 {
+		utils.SuccessResponse(c, http.StatusOK, "No active sessions found or already logged out", nil)
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Logout successful", nil)
 }

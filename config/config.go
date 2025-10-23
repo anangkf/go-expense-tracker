@@ -24,8 +24,10 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret      string
-	ExpireHours int
+	Secret             string
+	ExpireHours        int
+	RefreshSecret      string
+	RefreshExpireHours int
 }
 
 type ServerConfig struct {
@@ -40,6 +42,7 @@ func LoadConfig() *Config {
 	}
 
 	expireHours, _ := strconv.Atoi(getEnv("JWT_EXPIRE_HOURS", "24"))
+	refreshExpireHours, _ := strconv.Atoi(getEnv("JWT_REFRESH_EXPIRE_HOURS", "168")) //expired after 7 days
 
 	return &Config{
 		Database: DatabaseConfig{
@@ -51,8 +54,10 @@ func LoadConfig() *Config {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:      getEnv("JWT_SECRET", "your-secret-key"),
-			ExpireHours: expireHours,
+			Secret:             getEnv("JWT_SECRET", "your-secret-key"),
+			ExpireHours:        expireHours,
+			RefreshSecret:      getEnv("JWT_REFRESH_SECRET", "your-refresh-secret-key"),
+			RefreshExpireHours: refreshExpireHours,
 		},
 		Server: ServerConfig{
 			Port: getEnv("SERVER_PORT", "8080"),

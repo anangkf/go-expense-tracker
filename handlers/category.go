@@ -80,6 +80,28 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Categories retrieved successfully", response)
 }
 
+// GET DEFAULT CATEGORIES
+// GetDefaultCategories godoc
+// @Summary Get default categories
+// @Description Get default categories for all users
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} utils.Response[[]models.Category]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/default [get]
+func (h *CategoryHandler) GetDefaultCategories(c *gin.Context) {
+	// GET DEFAULT CATEGORIES BY USER ID
+	categories, err := h.categoryRepo.GetDefaultCategories()
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get default categories")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Default categories retrieved successfully", categories)
+}
+
 // CREATE CATEGORY
 // CreateCategory godoc
 // @Summary Create a new category
@@ -137,6 +159,121 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, http.StatusCreated, "Category created successfully", categories[0])
+}
+
+// CREATE MULTIPLE CATEGORIES
+// CreateCategory godoc
+// @Summary Create multiple categories
+// @Description Create multiple categories for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Param request body []models.CategoryRequest true "Category data"
+// @Success 201 {object} utils.Response[[]models.Category]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/multiple [post]
+func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	var req []models.CategoryRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	for _, item := range req {
+		if err := h.validator.Struct(item); err != nil {
+			utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	// CREATE CATEGORIES
+	categories := make([]*models.Category, 0, len(req))
+	for _, item := range req {
+		categories = append(categories, &models.Category{
+			Name:      item.Name,
+			UserID:    &user.ID,
+			Type:      item.Type,
+			IsDefault: false,
+		})
+	}
+
+	if err := h.categoryRepo.CreateMany(categories); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create categories")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusCreated, "Categories created successfully", categories)
+}
+
+// GET CATEGORY BY ID
+// GetCategoryByID godoc
+// @Summary Get a category by ID
+// @Description Get a category by ID for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Category ID"
+// @Success 200 {object} utils.Response[models.Category]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 404 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/{id} [get]
+func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET CATEGORY ID FROM PATH
+	categoryID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid category ID")
+		return
+	}
+
+	// GET CATEGORY BY ID
+	category, err := h.categoryRepo.GetByID(uint(categoryID))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusNotFound, "Category not found")
+		return
+	}
+
+	// CHECK IF CATEGORY BELONGS TO USER
+	if category.UserID == nil || *category.UserID != user.ID {
+		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to access this category")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Category retrieved successfully", category)
 }
 
 // UPDATE CATEGORY
