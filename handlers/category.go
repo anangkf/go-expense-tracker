@@ -161,6 +161,69 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusCreated, "Category created successfully", categories[0])
 }
 
+// CREATE MULTIPLE CATEGORIES
+// CreateCategory godoc
+// @Summary Create multiple categories
+// @Description Create multiple categories for the authenticated user
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Param request body []models.CategoryRequest true "Category data"
+// @Success 201 {object} utils.Response[[]models.Category]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/multiple [post]
+func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "User not authenticated")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	var req []models.CategoryRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// INPUT VALIDATION
+	for _, item := range req {
+		if err := h.validator.Struct(item); err != nil {
+			utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	// CREATE CATEGORIES
+	categories := make([]*models.Category, 0, len(req))
+	for _, item := range req {
+		categories = append(categories, &models.Category{
+			Name:      item.Name,
+			UserID:    &user.ID,
+			Type:      item.Type,
+			IsDefault: false,
+		})
+	}
+
+	if err := h.categoryRepo.CreateMany(categories); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create categories")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusCreated, "Categories created successfully", categories)
+}
+
 // GET CATEGORY BY ID
 // GetCategoryByID godoc
 // @Summary Get a category by ID

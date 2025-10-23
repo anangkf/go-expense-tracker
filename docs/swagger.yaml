@@ -666,6 +666,44 @@ paths:
       summary: Get default categories
       tags:
       - categories
+  /categories/multiple:
+    post:
+      consumes:
+      - application/json
+      description: Create multiple categories for the authenticated user
+      parameters:
+      - description: Category data
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.CategoryRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create multiple categories
+      tags:
+      - categories
   /expenses:
     get:
       consumes:
