@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"go-expense-tracker-api/config"
 	"go-expense-tracker-api/database"
@@ -12,6 +13,7 @@ import (
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -57,6 +59,17 @@ func main() {
 
 func setupRouter(cfg *config.Config) *gin.Engine {
 	router := gin.Default()
+
+	// SETUP CORS MIDDLEWARE
+	router.Use(cors.New(cors.Config{
+		// AllowOrigins: []string{"http://localhost:3000", "https://your-production-domain.com"},
+		AllowAllOrigins:  true, // for development only
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// INIT SERVICES
 	jwtServices := services.NewJWTService(cfg)
