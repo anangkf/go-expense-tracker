@@ -80,6 +80,28 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Categories retrieved successfully", response)
 }
 
+// GET DEFAULT CATEGORIES
+// GetDefaultCategories godoc
+// @Summary Get default categories
+// @Description Get default categories for all users
+// @Tags categories
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} utils.Response[[]models.Category]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /categories/default [get]
+func (h *CategoryHandler) GetDefaultCategories(c *gin.Context) {
+	// GET DEFAULT CATEGORIES BY USER ID
+	categories, err := h.categoryRepo.GetDefaultCategories()
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get default categories")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Default categories retrieved successfully", categories)
+}
+
 // CREATE CATEGORY
 // CreateCategory godoc
 // @Summary Create a new category

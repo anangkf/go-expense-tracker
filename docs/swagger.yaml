@@ -206,6 +206,19 @@ definitions:
       success:
         type: boolean
     type: object
+  utils.Response-array_models_Category:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
   utils.Response-models_Category:
     properties:
       data:
@@ -630,6 +643,27 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a category
+      tags:
+      - categories
+  /categories/default:
+    get:
+      consumes:
+      - application/json
+      description: Get default categories for all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_Category'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get default categories
       tags:
       - categories
   /expenses:
