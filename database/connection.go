@@ -16,11 +16,11 @@ var DB *gorm.DB
 
 func InitDatabase(cfg *config.Config) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Database.Host,
-		cfg.Database.Port,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.Database.User,
 		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Port,
 		cfg.Database.DBName,
 		cfg.Database.SSLMode,
 	)
