@@ -208,6 +208,350 @@ const docTemplate = `{
                 }
             }
         },
+        "/budget-plans": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get budget plans for the authenticated user with pagination and filters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Get budget plans by user ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "id",
+                        "description": "Sort by field",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "asc",
+                        "description": "Sort order (asc or desc)",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ResponseWithPagination-array_models_BudgetPlan"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new budget plan for the authenticated user. Can be created from a template or from scratch.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Create a new budget plan",
+                "parameters": [
+                    {
+                        "description": "Budget Plan",
+                        "name": "budgetPlan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BudgetPlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_BudgetPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-plans/templates": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get default budget plan templates for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Get budget plan templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-array_models_BudgetPlan"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-plans/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a budget plan by its ID for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Get budget plan by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_BudgetPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing budget plan for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Update a budget plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Budget Plan",
+                        "name": "budgetPlan",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BudgetPlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_BudgetPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an existing budget plan for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Delete a budget plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_DeleteBudgetPlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
         "/categories": {
             "get": {
                 "security": [
@@ -594,6 +938,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/utils.Response-any"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -970,6 +1320,137 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.BucketType": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BudgetBucket": {
+            "type": "object",
+            "properties": {
+                "bucket_type": {
+                    "description": "RELATIONSHIPS",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.BucketType"
+                        }
+                    ]
+                },
+                "bucket_type_id": {
+                    "type": "integer"
+                },
+                "budget_plan_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BudgetBucketRequest": {
+            "type": "object",
+            "required": [
+                "bucket_type_id",
+                "name",
+                "percentage"
+            ],
+            "properties": {
+                "bucket_type_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.BudgetPlan": {
+            "type": "object",
+            "properties": {
+                "buckets": {
+                    "description": "RELATIONSHIPS",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetBucket"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_template": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "Nullable for templates",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.BudgetPlanRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "buckets": {
+                    "description": "RELATIONSHIPS",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetBucketRequest"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "is_template": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Category": {
             "type": "object",
             "required": [
@@ -977,6 +1458,17 @@ const docTemplate = `{
                 "type"
             ],
             "properties": {
+                "bucket_type": {
+                    "description": "RELATIONSHIPS",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.BucketType"
+                        }
+                    ]
+                },
+                "bucket_type_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1006,10 +1498,14 @@ const docTemplate = `{
         "models.CategoryRequest": {
             "type": "object",
             "required": [
+                "bucket_type_id",
                 "name",
                 "type"
             ],
             "properties": {
+                "bucket_type_id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string",
                     "maxLength": 100,
@@ -1021,6 +1517,43 @@ const docTemplate = `{
                         "expense",
                         "income"
                     ]
+                }
+            }
+        },
+        "models.DeleteBudgetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "buckets": {
+                    "description": "RELATIONSHIPS",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetBucket"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_template": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "Nullable for templates",
+                    "type": "integer"
                 }
             }
         },
@@ -1217,6 +1750,29 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.PaginationResponse-array_models_BudgetPlan": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetPlan"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "utils.PaginationResponse-array_models_Category": {
             "type": "object",
             "properties": {
@@ -1268,7 +1824,27 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "error": {
+                    "type": "boolean"
+                },
+                "message": {
                     "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-array_models_BudgetPlan": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetPlan"
+                    }
+                },
+                "error": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1288,7 +1864,24 @@ const docTemplate = `{
                     }
                 },
                 "error": {
+                    "type": "boolean"
+                },
+                "message": {
                     "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-models_BudgetPlan": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.BudgetPlan"
+                },
+                "error": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1305,7 +1898,24 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.Category"
                 },
                 "error": {
+                    "type": "boolean"
+                },
+                "message": {
                     "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-models_DeleteBudgetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.DeleteBudgetPlanResponse"
+                },
+                "error": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1322,7 +1932,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.DeleteCategoryResponse"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1339,7 +1949,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.Expense"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1356,7 +1966,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.LoginResponse"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1373,7 +1983,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.RefreshTokenResponse"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1390,7 +2000,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.RegisterResponse"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1407,7 +2017,24 @@ const docTemplate = `{
                     "$ref": "#/definitions/models.UserResponse"
                 },
                 "error": {
+                    "type": "boolean"
+                },
+                "message": {
                     "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.ResponseWithPagination-array_models_BudgetPlan": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/utils.PaginationResponse-array_models_BudgetPlan"
+                },
+                "error": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1424,7 +2051,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/utils.PaginationResponse-array_models_Category"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -1441,7 +2068,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/utils.PaginationResponse-array_models_Expense"
                 },
                 "error": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"

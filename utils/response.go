@@ -8,7 +8,7 @@ type Response[T any] struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Data    T      `json:"data,omitempty"`
-	Error   string `json:"error,omitempty"`
+	Error   bool   `json:"error,omitempty"`
 }
 
 type PaginationResponse[T any] struct {
@@ -34,8 +34,8 @@ func SuccessResponse(c *gin.Context, statusCode int, message string, data any) {
 func ErrorResponse(c *gin.Context, statusCode int, message string) {
 	c.JSON(statusCode, Response[any]{
 		Success: false,
-		Message: "Error",
-		Error:   message,
+		Message: message,
+		Error:   true,
 	})
 }
 

@@ -7,14 +7,18 @@ import (
 )
 
 type Category struct {
-	ID        uint           `json:"id" gorm:"primaryKey;autoIncrement"`
-	Name      string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
-	UserID    *uint          `json:"-" gorm:"index"`
-	Type      string         `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
-	IsDefault bool           `json:"is_default" gorm:"index"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID           uint           `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name         string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
+	UserID       *uint          `json:"-" gorm:"index"`
+	Type         string         `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
+	IsDefault    bool           `json:"is_default" gorm:"index"`
+	BucketTypeID uint           `gorm:"not null" json:"bucket_type_id"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// RELATIONSHIPS
+	BucketType BucketType `gorm:"foreignKey:BucketTypeID" json:"bucket_type"`
 }
 
 type CategoryReponse struct {
@@ -25,8 +29,9 @@ type CategoryReponse struct {
 }
 
 type CategoryRequest struct {
-	Name string `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
-	Type string `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
+	BucketTypeID uint   `json:"bucket_type_id" validate:"required"`
+	Name         string `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
+	Type         string `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
 }
 
 type DeleteCategoryResponse struct {

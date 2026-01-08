@@ -1,7 +1,99 @@
 basePath: /api/v1
 definitions:
+  models.BucketType:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.BudgetBucket:
+    properties:
+      bucket_type:
+        allOf:
+        - $ref: '#/definitions/models.BucketType'
+        description: RELATIONSHIPS
+      bucket_type_id:
+        type: integer
+      budget_plan_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      percentage:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.BudgetBucketRequest:
+    properties:
+      bucket_type_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      percentage:
+        type: number
+    required:
+    - bucket_type_id
+    - name
+    - percentage
+    type: object
+  models.BudgetPlan:
+    properties:
+      buckets:
+        description: RELATIONSHIPS
+        items:
+          $ref: '#/definitions/models.BudgetBucket'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_template:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: Nullable for templates
+        type: integer
+    type: object
+  models.BudgetPlanRequest:
+    properties:
+      buckets:
+        description: RELATIONSHIPS
+        items:
+          $ref: '#/definitions/models.BudgetBucketRequest'
+        type: array
+      description:
+        type: string
+      is_template:
+        type: boolean
+      name:
+        type: string
+    required:
+    - name
+    type: object
   models.Category:
     properties:
+      bucket_type:
+        allOf:
+        - $ref: '#/definitions/models.BucketType'
+        description: RELATIONSHIPS
+      bucket_type_id:
+        type: integer
       created_at:
         type: string
       id:
@@ -25,6 +117,8 @@ definitions:
     type: object
   models.CategoryRequest:
     properties:
+      bucket_type_id:
+        type: integer
       name:
         maxLength: 100
         minLength: 2
@@ -35,8 +129,34 @@ definitions:
         - income
         type: string
     required:
+    - bucket_type_id
     - name
     - type
+    type: object
+  models.DeleteBudgetPlanResponse:
+    properties:
+      buckets:
+        description: RELATIONSHIPS
+        items:
+          $ref: '#/definitions/models.BudgetBucket'
+        type: array
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_template:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        description: Nullable for templates
+        type: integer
     type: object
   models.DeleteCategoryResponse:
     properties:
@@ -166,6 +286,21 @@ definitions:
       name:
         type: string
     type: object
+  utils.PaginationResponse-array_models_BudgetPlan:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.BudgetPlan'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   utils.PaginationResponse-array_models_Category:
     properties:
       data:
@@ -200,7 +335,20 @@ definitions:
     properties:
       data: {}
       error:
+        type: boolean
+      message:
         type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-array_models_BudgetPlan:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.BudgetPlan'
+        type: array
+      error:
+        type: boolean
       message:
         type: string
       success:
@@ -213,7 +361,18 @@ definitions:
           $ref: '#/definitions/models.Category'
         type: array
       error:
+        type: boolean
+      message:
         type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_BudgetPlan:
+    properties:
+      data:
+        $ref: '#/definitions/models.BudgetPlan'
+      error:
+        type: boolean
       message:
         type: string
       success:
@@ -224,7 +383,18 @@ definitions:
       data:
         $ref: '#/definitions/models.Category'
       error:
+        type: boolean
+      message:
         type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_DeleteBudgetPlanResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.DeleteBudgetPlanResponse'
+      error:
+        type: boolean
       message:
         type: string
       success:
@@ -235,7 +405,7 @@ definitions:
       data:
         $ref: '#/definitions/models.DeleteCategoryResponse'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -246,7 +416,7 @@ definitions:
       data:
         $ref: '#/definitions/models.Expense'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -257,7 +427,7 @@ definitions:
       data:
         $ref: '#/definitions/models.LoginResponse'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -268,7 +438,7 @@ definitions:
       data:
         $ref: '#/definitions/models.RefreshTokenResponse'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -279,7 +449,7 @@ definitions:
       data:
         $ref: '#/definitions/models.RegisterResponse'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -290,7 +460,18 @@ definitions:
       data:
         $ref: '#/definitions/models.UserResponse'
       error:
+        type: boolean
+      message:
         type: string
+      success:
+        type: boolean
+    type: object
+  utils.ResponseWithPagination-array_models_BudgetPlan:
+    properties:
+      data:
+        $ref: '#/definitions/utils.PaginationResponse-array_models_BudgetPlan'
+      error:
+        type: boolean
       message:
         type: string
       success:
@@ -301,7 +482,7 @@ definitions:
       data:
         $ref: '#/definitions/utils.PaginationResponse-array_models_Category'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -312,7 +493,7 @@ definitions:
       data:
         $ref: '#/definitions/utils.PaginationResponse-array_models_Expense'
       error:
-        type: string
+        type: boolean
       message:
         type: string
       success:
@@ -450,6 +631,229 @@ paths:
       summary: Register users
       tags:
       - auth
+  /budget-plans:
+    get:
+      consumes:
+      - application/json
+      description: Get budget plans for the authenticated user with pagination and
+        filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: asc
+        description: Sort order (asc or desc)
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ResponseWithPagination-array_models_BudgetPlan'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get budget plans by user ID
+      tags:
+      - budget-plans
+    post:
+      consumes:
+      - application/json
+      description: Create a new budget plan for the authenticated user. Can be created
+        from a template or from scratch.
+      parameters:
+      - description: Budget Plan
+        in: body
+        name: budgetPlan
+        required: true
+        schema:
+          $ref: '#/definitions/models.BudgetPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-models_BudgetPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create a new budget plan
+      tags:
+      - budget-plans
+  /budget-plans/{id}:
+    delete:
+      description: Delete an existing budget plan for the authenticated user
+      parameters:
+      - description: Budget Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_DeleteBudgetPlanResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Delete a budget plan
+      tags:
+      - budget-plans
+    get:
+      consumes:
+      - application/json
+      description: Get a budget plan by its ID for the authenticated user
+      parameters:
+      - description: Budget Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_BudgetPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get budget plan by ID
+      tags:
+      - budget-plans
+    put:
+      consumes:
+      - application/json
+      description: Update an existing budget plan for the authenticated user
+      parameters:
+      - description: Budget Plan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Budget Plan
+        in: body
+        name: budgetPlan
+        required: true
+        schema:
+          $ref: '#/definitions/models.BudgetPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_BudgetPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Update a budget plan
+      tags:
+      - budget-plans
+  /budget-plans/templates:
+    get:
+      consumes:
+      - application/json
+      description: Get default budget plan templates for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_BudgetPlan'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get budget plan templates
+      tags:
+      - budget-plans
   /categories:
     get:
       consumes:
@@ -559,6 +963,10 @@ paths:
             $ref: '#/definitions/utils.Response-models_DeleteCategoryResponse'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/utils.Response-any'
         "500":

@@ -79,20 +79,22 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	categoryRepo := repositories.NewCategoryRepository(database.DB)
 	expenseRepo := repositories.NewExpenseRepository(database.DB)
 	refreshTokenRepo := repositories.NewRefreshTokenRepository(database.DB)
+	budgetPlanRepo := repositories.NewBudgetPlanRepository(database.DB)
 
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, jwtServices)
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
+	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -121,6 +123,15 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		// USER ROUTES
 		user := protected.Group("/user")
 		user.GET("/profile", userHandler.GetUserProfile)
+
+		// BUDGET PLAN ROUTES
+		budgetPlan := protected.Group("/budget-plans")
+		budgetPlan.GET("/templates", budgetPlanHandler.GetBudgetPlanTemplates)
+		budgetPlan.GET("/", budgetPlanHandler.GetBudgetPlans)
+		budgetPlan.POST("/", budgetPlanHandler.CreateBudgetPlan)
+		budgetPlan.GET("/:id", budgetPlanHandler.GetBudgetPlan)
+		budgetPlan.PUT("/:id", budgetPlanHandler.UpdateBudgetPlan)
+		budgetPlan.DELETE("/:id", budgetPlanHandler.DeleteBudgetPlan)
 
 		// CATEGORY ROUTES
 		category := protected.Group("/categories")

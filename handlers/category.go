@@ -360,6 +360,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Param id path int true "Category ID"
 // @Success 200 {object} utils.Response[models.DeleteCategoryResponse]
 // @Failure 401 {object} utils.Response[any]
+// @Failure 404 {object} utils.Response[any]
 // @Failure 500 {object} utils.Response[any]
 // @Security BearerAuth
 // @Router /categories/{id} [delete]
