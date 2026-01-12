@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
@@ -78,16 +77,10 @@ func (h *BudgetPlanHandler) GetBudgetPlans(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	if err := h.validator.Var(userID, "required,number"); err != nil {
-		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
-		return
-	}
-
 	// GET QUERY PARAMS
 	queryParams, _ := c.Get("queryParams")
 
-	budgetPlans, total, totalPages, err := h.budgetPlanRepo.GetBudgetPlansByUserID(userID.(uint), queryParams.(middleware.QueryParams))
+	budgetPlans, total, totalPages, err := h.budgetPlanRepo.GetBudgetPlansByUserID(userID.(uint), queryParams.(utils.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get budget plans")
 		return
@@ -96,8 +89,8 @@ func (h *BudgetPlanHandler) GetBudgetPlans(c *gin.Context) {
 	response := gin.H{
 		"data":        budgetPlans,
 		"total":       total,
-		"page":        queryParams.(middleware.QueryParams).Page,
-		"limit":       queryParams.(middleware.QueryParams).Limit,
+		"page":        queryParams.(utils.QueryParams).Page,
+		"limit":       queryParams.(utils.QueryParams).Limit,
 		"total_pages": totalPages,
 	}
 
@@ -124,7 +117,7 @@ func (h *BudgetPlanHandler) CreateBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
+	// GET USER DATA
 	user, err := h.userRepo.GetByID(userID.(uint))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
@@ -214,13 +207,6 @@ func (h *BudgetPlanHandler) GetBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET BUDGET PLAN ID FROM URL PARAMS
 	budgetPlanID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -229,7 +215,7 @@ func (h *BudgetPlanHandler) GetBudgetPlan(c *gin.Context) {
 	}
 
 	// GET BUDGET PLAN FROM REPOSITORY
-	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), user.ID)
+	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), userID.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.ErrorResponse(c, http.StatusNotFound, "Budget plan not found")
@@ -264,13 +250,6 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET BUDGET PLAN ID FROM URL PARAMS
 	budgetPlanID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -279,7 +258,7 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 	}
 
 	// GET BUDGET PLAN FROM REPOSITORY
-	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), user.ID)
+	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), userID.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.ErrorResponse(c, http.StatusNotFound, "Budget plan not found")
@@ -367,7 +346,7 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 	}
 
 	// RE-FETCH THE BUDGET PLAN TO GET THE LATEST BUCKET DATA
-	updatedBudgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), user.ID)
+	updatedBudgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), userID.(uint))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to retrieve updated budget plan")
 		return
@@ -398,13 +377,6 @@ func (h *BudgetPlanHandler) DeleteBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET BUDGET PLAN ID FROM URL PARAMS
 	budgetPlanID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -413,7 +385,7 @@ func (h *BudgetPlanHandler) DeleteBudgetPlan(c *gin.Context) {
 	}
 
 	// GET BUDGET PLAN FROM REPOSITORY
-	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), user.ID)
+	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), userID.(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.ErrorResponse(c, http.StatusNotFound, "Budget plan not found")
@@ -424,7 +396,7 @@ func (h *BudgetPlanHandler) DeleteBudgetPlan(c *gin.Context) {
 	}
 
 	// CHECK IF BUDGET PLAN IS BELONGING TO USER
-	if budgetPlan.UserID == nil || *budgetPlan.UserID != user.ID {
+	if budgetPlan.UserID == nil || *budgetPlan.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to delete this budget plan")
 		return
 	}
@@ -459,7 +431,7 @@ func (h *BudgetPlanHandler) SetActiveBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
+	// GET USER DATA
 	user, err := h.userRepo.GetByID(userID.(uint))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")

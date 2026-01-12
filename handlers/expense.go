@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
@@ -55,18 +54,11 @@ func (h *ExpenseHandler) GetExpensesByUserID(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET QUERY PARAMETERS
 	queryParams, _ := c.Get("queryParams")
 
 	// GET EXPENSES BY USER ID
-	expenses, total, totalPages, err := h.expenseRepo.GetByUserID(user.ID, queryParams.(middleware.QueryParams))
+	expenses, total, totalPages, err := h.expenseRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get expenses")
 		return
@@ -75,8 +67,8 @@ func (h *ExpenseHandler) GetExpensesByUserID(c *gin.Context) {
 	response := gin.H{
 		"data":        expenses,
 		"total":       total,
-		"page":        queryParams.(middleware.QueryParams).Page,
-		"limit":       queryParams.(middleware.QueryParams).Limit,
+		"page":        queryParams.(utils.QueryParams).Page,
+		"limit":       queryParams.(utils.QueryParams).Limit,
 		"total_pages": totalPages,
 	}
 
@@ -106,13 +98,6 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// VALIDATE REQUEST BODY
 	var req models.ExpenseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -135,7 +120,7 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 
 	// VALIDATE CATEGORY BELONGING TO USER
 	if !category.IsDefault {
-		if category.UserID == nil || *category.UserID != user.ID {
+		if category.UserID == nil || *category.UserID != userID.(uint) {
 			utils.ErrorResponse(c, http.StatusBadRequest, "Category does not belong to this user")
 			return
 		}
@@ -145,7 +130,7 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	expense := models.Expense{
 		Name:       req.Name,
 		Amount:     req.Amount,
-		UserID:     user.ID,
+		UserID:     userID.(uint),
 		CategoryID: category.ID,
 	}
 
@@ -189,13 +174,6 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET EXPENSE ID FROM URL PARAM
 	expenseID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -211,7 +189,7 @@ func (h *ExpenseHandler) GetExpenseByID(c *gin.Context) {
 	}
 
 	// CHECK IF EXPENSE BELONGS TO USER
-	if expense.UserID != user.ID {
+	if expense.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Expense does not belong to this user")
 		return
 	}
@@ -243,13 +221,6 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET EXPENSE ID FROM URL PARAM
 	expenseID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -265,7 +236,7 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	}
 
 	// CHECK IF EXPENSE BELONGS TO USER
-	if expense.UserID != user.ID {
+	if expense.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Expense does not belong to this user")
 		return
 	}
@@ -292,7 +263,7 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 
 	// VALIDATE CATEGORY BELONGING TO USER
 	if !category.IsDefault {
-		if category.UserID == nil || *category.UserID != user.ID {
+		if category.UserID == nil || *category.UserID != userID.(uint) {
 			utils.ErrorResponse(c, http.StatusBadRequest, "Category does not belong to this user")
 			return
 		}
@@ -335,13 +306,6 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET EXPENSE ID FROM URL PARAM
 	expenseID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -357,7 +321,7 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	}
 
 	// CHECK IF EXPENSE BELONGS TO USER
-	if expense.UserID != user.ID {
+	if expense.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Expense does not belong to this user")
 		return
 	}

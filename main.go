@@ -63,12 +63,12 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	// SETUP CORS MIDDLEWARE
 	router.Use(cors.New(cors.Config{
 		// AllowOrigins: []string{"http://localhost:3000", "https://your-production-domain.com"},
-		AllowAllOrigins:  true, // for development only
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
+		AllowAllOrigins: true, // for development only
+		AllowMethods:    []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:   []string{"Content-Length"},
+		// AllowCredentials: true,
+		MaxAge: 12 * time.Hour,
 	}))
 
 	// INIT SERVICES
@@ -89,12 +89,12 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo, expenseRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler, userRepo)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler, userRepo *repositories.UserRepository) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -112,12 +112,12 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/refresh-token", authHandler.RefreshToken)
-		auth.POST("/logout", middleware.AuthMiddleware(jwtService), authHandler.Logout)
+		auth.POST("/logout", middleware.AuthMiddleware(jwtService, userRepo), authHandler.Logout)
 	}
 
 	// PROTECTED ROUTES
 	protected := v1.Group("/")
-	protected.Use(middleware.AuthMiddleware((jwtService)))
+	protected.Use(middleware.AuthMiddleware((jwtService), userRepo))
 	protected.Use(middleware.PaginationAndFilter())
 	{
 		// USER ROUTES

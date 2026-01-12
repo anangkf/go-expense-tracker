@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
+	"go-expense-tracker-api/utils"
 	"strings"
 
 	"gorm.io/gorm"
@@ -31,7 +31,7 @@ func (r *CategoryRepository) CreateMany(categories []*models.Category) error {
 	return r.db.Create(categories).Error
 }
 
-func (r *CategoryRepository) GetByUserID(userID uint, queryParams middleware.QueryParams) (*[]models.Category, int64, int64, error) {
+func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryParams) (*[]models.Category, int64, int64, error) {
 	var categories []models.Category
 	var total int64
 

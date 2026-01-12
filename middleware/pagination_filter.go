@@ -1,19 +1,12 @@
 package middleware
 
 import (
+	"go-expense-tracker-api/utils"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-type QueryParams struct {
-	Page    int
-	Limit   int
-	Filters map[string]string
-	SortBy  string
-	Order   string
-}
 
 func PaginationAndFilter() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -36,7 +29,7 @@ func PaginationAndFilter() gin.HandlerFunc {
 			}
 		}
 
-		queryParams := QueryParams{
+		queryParams := utils.QueryParams{
 			Page:    page,
 			Limit:   limit,
 			Filters: filters,
