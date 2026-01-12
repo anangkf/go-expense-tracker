@@ -30,9 +30,6 @@ func seedBucketType() {
 func seedCategories() {
 	bt1, bt2 := uint(1), uint(2)
 	categories := []models.Category{
-		// Income
-		{Name: "Gaji", Type: "income", IsDefault: true, BucketTypeID: nil},
-
 		// Expense
 		{Name: "Food", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
 		{Name: "Transport", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
