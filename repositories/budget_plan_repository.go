@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"fmt"
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
+	"go-expense-tracker-api/utils"
 	"strings"
 
 	"gorm.io/gorm"
@@ -30,7 +30,7 @@ func (r *BudgetPlanRepository) GetBudgetPlanTemplates() ([]models.BudgetPlan, er
 	return templates, err
 }
 
-func (r *BudgetPlanRepository) GetBudgetPlansByUserID(userID uint, queryParams middleware.QueryParams) (*[]models.BudgetPlan, int64, int64, error) {
+func (r *BudgetPlanRepository) GetBudgetPlansByUserID(userID uint, queryParams utils.QueryParams) (*[]models.BudgetPlan, int64, int64, error) {
 	var budgetPlans []models.BudgetPlan
 	var total int64
 

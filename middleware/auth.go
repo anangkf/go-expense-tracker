@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"strings"
 
+	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 	"go-expense-tracker-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(jwtService *services.JWTService) gin.HandlerFunc {
+func AuthMiddleware(jwtService *services.JWTService, userRepo *repositories.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
@@ -34,6 +35,12 @@ func AuthMiddleware(jwtService *services.JWTService) gin.HandlerFunc {
 		if err != nil {
 			utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid token: "+err.Error())
 			c.Abort()
+			return
+		}
+
+		// VALIDATE USER ID
+		if _, err := userRepo.GetByID(claims.UserID); err != nil {
+			utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
 			return
 		}
 

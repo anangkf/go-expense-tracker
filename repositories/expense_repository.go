@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
+	"go-expense-tracker-api/utils"
 	"strings"
 	"time"
 
@@ -17,7 +17,7 @@ func NewExpenseRepository(db *gorm.DB) *ExpenseRepository {
 	return &ExpenseRepository{db: db}
 }
 
-func (r *ExpenseRepository) GetByUserID(userID uint, queryParams middleware.QueryParams) (*[]models.Expense, int64, int64, error) {
+func (r *ExpenseRepository) GetByUserID(userID uint, queryParams utils.QueryParams) (*[]models.Expense, int64, int64, error) {
 	var expenses []models.Expense
 	var total int64
 

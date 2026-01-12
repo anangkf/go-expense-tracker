@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
@@ -52,18 +51,11 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET QUERY PARAMETERS
 	queryParams, _ := c.Get("queryParams")
 
 	// GET CATEGORIES BY USER ID
-	categories, total, totalPages, err := h.categoryRepo.GetByUserID(user.ID, queryParams.(middleware.QueryParams))
+	categories, total, totalPages, err := h.categoryRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get categories")
 		return
@@ -72,8 +64,8 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 	response := gin.H{
 		"data":        categories,
 		"total":       total,
-		"page":        queryParams.(middleware.QueryParams).Page,
-		"limit":       queryParams.(middleware.QueryParams).Limit,
+		"page":        queryParams.(utils.QueryParams).Page,
+		"limit":       queryParams.(utils.QueryParams).Limit,
 		"total_pages": totalPages,
 	}
 
@@ -124,13 +116,6 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	var req models.Category
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -150,10 +135,11 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
+	userIDPtr := userID.(uint)
 	// CREATE CATEGORY
 	category := &models.Category{
 		Name:         req.Name,
-		UserID:       &user.ID,
+		UserID:       &userIDPtr,
 		Type:         req.Type,
 		IsDefault:    false,
 		BucketTypeID: req.BucketTypeID,
@@ -190,13 +176,6 @@ func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	var req []models.CategoryRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -218,10 +197,11 @@ func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
 			return
 		}
 
+		userIDPtr := userID.(uint)
 		// CREATE CATEGORIES
 		categories = append(categories, &models.Category{
 			Name:         item.Name,
-			UserID:       &user.ID,
+			UserID:       &userIDPtr,
 			Type:         item.Type,
 			IsDefault:    false,
 			BucketTypeID: item.BucketTypeID,
@@ -258,13 +238,6 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET CATEGORY ID FROM PATH
 	categoryID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -280,7 +253,7 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 	}
 
 	// CHECK IF CATEGORY BELONGS TO USER
-	if category.UserID == nil || *category.UserID != user.ID {
+	if category.UserID == nil || *category.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to access this category")
 		return
 	}
@@ -311,13 +284,6 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET CATEGORY ID FROM PATH
 	categoryID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -345,7 +311,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	}
 
 	// CHECK IF CATEGORY BELONGS TO USER
-	if category.UserID == nil || *category.UserID != user.ID {
+	if category.UserID == nil || *category.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to update this category")
 		return
 	}
@@ -384,13 +350,6 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	// VALIDATE USER ID
-	user, err := h.userRepo.GetByID(userID.(uint))
-	if err != nil {
-		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
-		return
-	}
-
 	// GET CATEGORY ID FROM PATH
 	categoryID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -406,7 +365,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	}
 
 	// CHECK IF CATEGORY BELONGS TO USER
-	if category.UserID == nil || *category.UserID != user.ID {
+	if category.UserID == nil || *category.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to delete this category")
 		return
 	}
