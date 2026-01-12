@@ -86,7 +86,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
-	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo)
+	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo, expenseRepo)
 
 	// SETUP ROUTES
 	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler)
@@ -128,7 +128,9 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		budgetPlan := protected.Group("/budget-plans")
 		budgetPlan.GET("/templates", budgetPlanHandler.GetBudgetPlanTemplates)
 		budgetPlan.GET("/", budgetPlanHandler.GetBudgetPlans)
+		budgetPlan.GET("/active", budgetPlanHandler.GetActiveBudgetPlan)
 		budgetPlan.POST("/", budgetPlanHandler.CreateBudgetPlan)
+		budgetPlan.POST("/:id/set-active", budgetPlanHandler.SetActiveBudgetPlan)
 		budgetPlan.GET("/:id", budgetPlanHandler.GetBudgetPlan)
 		budgetPlan.PUT("/:id", budgetPlanHandler.UpdateBudgetPlan)
 		budgetPlan.DELETE("/:id", budgetPlanHandler.DeleteBudgetPlan)

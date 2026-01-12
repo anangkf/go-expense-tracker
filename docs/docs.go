@@ -327,6 +327,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/budget-plans/active": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the active budget plan for the authenticated user, along with total spending for each bucket type and their percentage of income",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Get active budget plan",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_ActiveBudgetPlanResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
         "/budget-plans/templates": {
             "get": {
                 "security": [
@@ -533,6 +579,67 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-plans/{id}/set-active": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Set a budget plan as active for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget-plans"
+                ],
+                "summary": "Set an active budget plan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Budget Plan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/utils.Response-any"
                         }
@@ -1320,6 +1427,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.ActiveBudgetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "budget_plan": {
+                    "$ref": "#/definitions/models.BudgetPlan"
+                },
+                "spending_by_bucket": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BucketSpending"
+                    }
+                },
+                "total_income": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.BucketSpending": {
+            "type": "object",
+            "properties": {
+                "allocation_percentage": {
+                    "type": "number"
+                },
+                "bucket_name": {
+                    "type": "string"
+                },
+                "max_allocation": {
+                    "type": "number"
+                },
+                "spending_percentage": {
+                    "type": "number"
+                },
+                "total_spending": {
+                    "type": "number"
+                }
+            }
+        },
         "models.BucketType": {
             "type": "object",
             "properties": {
@@ -1448,6 +1592,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "set_as_active": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1520,6 +1667,43 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DeleteBudgetBucketResponse": {
+            "type": "object",
+            "properties": {
+                "bucket_type": {
+                    "description": "RELATIONSHIPS",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.BucketType"
+                        }
+                    ]
+                },
+                "bucket_type_id": {
+                    "type": "integer"
+                },
+                "budget_plan_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "models.DeleteBudgetPlanResponse": {
             "type": "object",
             "properties": {
@@ -1527,7 +1711,7 @@ const docTemplate = `{
                     "description": "RELATIONSHIPS",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.BudgetBucket"
+                        "$ref": "#/definitions/models.DeleteBudgetBucketResponse"
                     }
                 },
                 "created_at": {
@@ -1598,6 +1782,9 @@ const docTemplate = `{
             "properties": {
                 "amount": {
                     "type": "number"
+                },
+                "bucket_type": {
+                    "$ref": "#/definitions/models.BucketType"
                 },
                 "category": {
                     "description": "RELATIONSHIPS",
@@ -1723,6 +1910,48 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/models.UserResponse"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "active_budget_plan_id": {
+                    "type": "integer"
+                },
+                "budget_plans": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.BudgetPlan"
+                    }
+                },
+                "categories": {
+                    "description": "RELATIONSHIPS",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1874,6 +2103,23 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.Response-models_ActiveBudgetPlanResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.ActiveBudgetPlanResponse"
+                },
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
         "utils.Response-models_BudgetPlan": {
             "type": "object",
             "properties": {
@@ -1998,6 +2244,23 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/models.RegisterResponse"
+                },
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-models_User": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.User"
                 },
                 "error": {
                     "type": "boolean"

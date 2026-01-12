@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/utils"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,13 +19,15 @@ import (
 type BudgetPlanHandler struct {
 	budgetPlanRepo *repositories.BudgetPlanRepository
 	userRepo       *repositories.UserRepository
+	expenseRepo    *repositories.ExpenseRepository
 	validator      *validator.Validate
 }
 
-func NewBudgetPlanHandler(budgetPlanRepo *repositories.BudgetPlanRepository, userRepo *repositories.UserRepository) *BudgetPlanHandler {
+func NewBudgetPlanHandler(budgetPlanRepo *repositories.BudgetPlanRepository, userRepo *repositories.UserRepository, expenseRepo *repositories.ExpenseRepository) *BudgetPlanHandler {
 	return &BudgetPlanHandler{
 		budgetPlanRepo: budgetPlanRepo,
 		userRepo:       userRepo,
+		expenseRepo:    expenseRepo,
 		validator:      validator.New(),
 	}
 }
@@ -127,7 +131,7 @@ func (h *BudgetPlanHandler) CreateBudgetPlan(c *gin.Context) {
 		return
 	}
 
-	var req models.BudgetPlan
+	var req models.BudgetPlanRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
@@ -153,18 +157,36 @@ func (h *BudgetPlanHandler) CreateBudgetPlan(c *gin.Context) {
 		return
 	}
 
+	// CONVERT BUCKET REQUESTS TO BUCKETS
+	var buckets []models.BudgetBucket
+	for _, bucketReq := range req.Buckets {
+		buckets = append(buckets, models.BudgetBucket{
+			Name:         bucketReq.Name,
+			Percentage:   bucketReq.Percentage,
+			BucketTypeID: bucketReq.BucketTypeID,
+		})
+	}
+
 	// CREATE BUDGET PLAN
 	budgetPlan := &models.BudgetPlan{
 		Name:        req.Name,
 		UserID:      &user.ID,
 		IsTemplate:  false,
 		Description: req.Description,
-		Buckets:     req.Buckets,
+		Buckets:     buckets,
 	}
 
 	if err := h.budgetPlanRepo.CreateBudgetPlan(budgetPlan); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create budget plan.")
 		return
+	}
+
+	// SET AS ACTIVE IF SPECIFIED
+	if req.SetAsActive {
+		user.ActiveBudgetPlanID = &budgetPlan.ID
+		if err := h.userRepo.Update(user); err != nil {
+			log.Printf("Failed to set budget plan %d as active for user %d: %v", budgetPlan.ID, user.ID, err)
+		}
 	}
 
 	utils.SuccessResponse(c, http.StatusCreated, "Budget plan created successfully", budgetPlan)
@@ -413,4 +435,153 @@ func (h *BudgetPlanHandler) DeleteBudgetPlan(c *gin.Context) {
 	}
 
 	utils.SuccessResponse(c, http.StatusOK, "Budget plan deleted successfully.", budgetPlan)
+}
+
+// SetActiveBudgetPlan godoc
+// @Summary Set an active budget plan
+// @Description Set a budget plan as active for the authenticated user
+// @Tags budget-plans
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Budget Plan ID"
+// @Success 200 {object} utils.Response[models.User]
+// @Failure 400 {object} utils.Response[any]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 404 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /budget-plans/{id}/set-active [post]
+func (h *BudgetPlanHandler) SetActiveBudgetPlan(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// VALIDATE USER ID
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET BUDGET PLAN ID FROM URL PARAMS
+	budgetPlanID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "Invalid budget plan ID")
+		return
+	}
+
+	// GET BUDGET PLAN FROM REPOSITORY
+	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(uint(budgetPlanID), user.ID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, "Budget plan not found")
+			return
+		}
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get budget plan")
+		return
+	}
+
+	user.ActiveBudgetPlanID = &budgetPlan.ID
+	if err := h.userRepo.Update(user); err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to set active budget plan")
+		return
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Budget plan has been set as active", user)
+}
+
+// GET ACTIVE BUDGET PLAN
+// GetActiveBudgetPlan godoc
+// @Summary Get active budget plan
+// @Description Get the active budget plan for the authenticated user, along with total spending for each bucket type and their percentage of income
+// @Tags budget-plans
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} utils.Response[models.ActiveBudgetPlanResponse]
+// @Failure 401 {object} utils.Response[any]
+// @Failure 404 {object} utils.Response[any]
+// @Failure 500 {object} utils.Response[any]
+// @Security BearerAuth
+// @Router /budget-plans/active [get]
+func (h *BudgetPlanHandler) GetActiveBudgetPlan(c *gin.Context) {
+	// GET USER ID FROM CONTEXT
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// GET USER
+	user, err := h.userRepo.GetByID(userID.(uint))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+		return
+	}
+
+	// CHECK IF USER HAS ACTIVE BUDGET PLAN
+	if user.ActiveBudgetPlanID == nil {
+		utils.ErrorResponse(c, http.StatusNotFound, "No active budget plan found")
+		return
+	}
+
+	// GET ACTIVE BUDGET PLAN
+	budgetPlan, err := h.budgetPlanRepo.GetBudgetPlanByID(*user.ActiveBudgetPlanID, user.ID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.ErrorResponse(c, http.StatusNotFound, "Active budget plan not found")
+			return
+		}
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get active budget plan")
+		return
+	}
+
+	// GET TOTAL INCOME
+	totalIncome, totalExpenses, err := h.expenseRepo.GetTotalIncomeAndExpenses(user.ID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get total income")
+		return
+	}
+	fmt.Printf("Total Income: %.2f, Total Expenses: %.2f\n", totalIncome, totalExpenses)
+
+	// GET TOTAL SPENDING FOR EACH BUCKET
+	spendingByBucket, err := h.budgetPlanRepo.GetTotalSpendingByBucket(*user.ActiveBudgetPlanID, user.ID)
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get spending by bucket")
+		return
+	}
+
+	// CREATE MAP FOR SPENDING
+	spendingMap := make(map[string]float64)
+	for _, s := range spendingByBucket {
+		spendingMap[s.BucketName] = s.TotalSpending
+	}
+
+	// CALCULATE ALLOCATION AND PERCENTAGE
+	var bucketResponses []models.BudgetBucketResponse
+	for _, bucket := range budgetPlan.Buckets {
+		maxAllocation := (bucket.Percentage / 100) * totalIncome
+		totalSpending := spendingMap[bucket.Name]
+		spendingPercentage := 0.0
+		if maxAllocation > 0 {
+			spendingPercentage = (totalSpending / maxAllocation) * 100
+		}
+
+		bucketResponses = append(bucketResponses, models.BudgetBucketResponse{
+			BudgetBucket:       bucket,
+			MaxAllocation:      maxAllocation,
+			TotalSpending:      totalSpending,
+			SpendingPercentage: spendingPercentage,
+		})
+	}
+
+	response := models.ActiveBudgetPlanResponse{
+		BudgetPlan:  *budgetPlan,
+		TotalIncome: totalIncome,
+		Buckets:     bucketResponses,
+	}
+
+	utils.SuccessResponse(c, http.StatusOK, "Success get active budget plan", response)
 }

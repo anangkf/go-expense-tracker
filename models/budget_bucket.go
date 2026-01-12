@@ -28,14 +28,14 @@ type BudgetBucketRequest struct {
 }
 
 type DeleteBudgetBucketResponse struct {
-	ID           uint           `json:"id"`
-	BudgetPlanID uint           `json:"budget_plan_id"`
-	BucketTypeID uint           `json:"bucket_type_id"`
-	Name         string         `json:"name"`
-	Percentage   float64        `json:"percentage"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `json:"deleted_at"`
+	ID           uint      `json:"id"`
+	BudgetPlanID uint      `json:"budget_plan_id"`
+	BucketTypeID uint      `json:"bucket_type_id"`
+	Name         string    `json:"name"`
+	Percentage   float64   `json:"percentage"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	DeletedAt    time.Time `json:"deleted_at"`
 
 	// RELATIONSHIPS
 	BucketType BucketType `gorm:"foreignKey:BucketTypeID" json:"bucket_type"`

@@ -144,12 +144,19 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
+	// CONDITIONAL VALIDATION FOR BUCKET TYPE ID
+	if req.Type == "expense" && req.BucketTypeID == nil {
+		utils.ErrorResponse(c, http.StatusBadRequest, "BucketTypeID is required for expense categories")
+		return
+	}
+
 	// CREATE CATEGORY
 	category := &models.Category{
-		Name:      req.Name,
-		UserID:    &user.ID,
-		Type:      req.Type,
-		IsDefault: false,
+		Name:         req.Name,
+		UserID:       &user.ID,
+		Type:         req.Type,
+		IsDefault:    false,
+		BucketTypeID: req.BucketTypeID,
 	}
 	categories := []*models.Category{category}
 
@@ -197,22 +204,27 @@ func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
 		return
 	}
 
-	// INPUT VALIDATION
+	categories := make([]*models.Category, 0, len(req))
 	for _, item := range req {
+		// INPUT VALIDATION
 		if err := h.validator.Struct(item); err != nil {
 			utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
-	}
 
-	// CREATE CATEGORIES
-	categories := make([]*models.Category, 0, len(req))
-	for _, item := range req {
+		// CONDITIONAL VALIDATION FOR BUCKET TYPE ID
+		if item.Type == "expense" && item.BucketTypeID == nil {
+			utils.ErrorResponse(c, http.StatusBadRequest, "BucketTypeID is required for expense categories")
+			return
+		}
+
+		// CREATE CATEGORIES
 		categories = append(categories, &models.Category{
-			Name:      item.Name,
-			UserID:    &user.ID,
-			Type:      item.Type,
-			IsDefault: false,
+			Name:         item.Name,
+			UserID:       &user.ID,
+			Type:         item.Type,
+			IsDefault:    false,
+			BucketTypeID: item.BucketTypeID,
 		})
 	}
 

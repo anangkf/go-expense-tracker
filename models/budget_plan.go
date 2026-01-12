@@ -24,6 +24,7 @@ type BudgetPlanRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"omitempty"`
 	IsTemplate  bool   `json:"is_template" validate:"omitempty"`
+	SetAsActive bool   `json:"set_as_active" validate:"omitempty"`
 
 	// RELATIONSHIPS
 	Buckets []BudgetBucketRequest `json:"buckets"`
@@ -41,4 +42,17 @@ type DeleteBudgetPlanResponse struct {
 
 	// RELATIONSHIPS
 	Buckets []DeleteBudgetBucketResponse `json:"buckets" gorm:"foreignKey:BudgetPlanID"`
+}
+
+type BudgetBucketResponse struct {
+	BudgetBucket
+	MaxAllocation      float64 `json:"max_allocation"`
+	TotalSpending      float64 `json:"total_spending"`
+	SpendingPercentage float64 `json:"spending_percentage"`
+}
+
+type ActiveBudgetPlanResponse struct {
+	BudgetPlan
+	TotalIncome float64                `json:"total_income"`
+	Buckets     []BudgetBucketResponse `json:"buckets"`
 }

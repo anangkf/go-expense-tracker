@@ -13,6 +13,11 @@ type BudgetPlanRepository struct {
 	db *gorm.DB
 }
 
+type TotalSpendingByBucket struct {
+	BucketName    string
+	TotalSpending float64
+}
+
 func NewBudgetPlanRepository(db *gorm.DB) *BudgetPlanRepository {
 	return &BudgetPlanRepository{db}
 }
@@ -134,4 +139,17 @@ func (r *BudgetPlanRepository) DeleteBudgetPlan(budgetPlan *models.BudgetPlan) e
 
 		return nil
 	})
+}
+
+func (r *BudgetPlanRepository) GetTotalSpendingByBucket(budgetPlanID uint, userID uint) ([]TotalSpendingByBucket, error) {
+	var result []TotalSpendingByBucket
+
+	err := r.db.Table("budget_buckets bb").
+		Select("bb.name as bucket_name, COALESCE(SUM(e.amount), 0) as total_spending").
+		Joins("LEFT JOIN expenses e ON e.bucket_type_id = bb.bucket_type_id AND e.user_id = ?", userID).
+		Where("bb.budget_plan_id = ?", budgetPlanID).
+		Group("bb.name").
+		Scan(&result).Error
+
+	return result, err
 }
