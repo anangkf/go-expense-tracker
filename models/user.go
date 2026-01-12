@@ -7,16 +7,18 @@ import (
 )
 
 type User struct {
-	ID        uint           `json:"id" gorm:"primaryKey;autoIncrement"`
-	Email     string         `json:"email" gorm:"uniqueIndex;not null" validate:"required,email"`
-	Name      string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
-	Password  string         `json:"-" gorm:"not null" validate:"required,min=6"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID                 uint           `json:"id" gorm:"primaryKey;autoIncrement"`
+	Email              string         `json:"email" gorm:"uniqueIndex;not null" validate:"required,email"`
+	Name               string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
+	Password           string         `json:"-" gorm:"not null" validate:"required,min=6"`
+	ActiveBudgetPlanID *uint          `json:"active_budget_plan_id" gorm:"index"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	DeletedAt          gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// RELATIONSHIPS
-	Categories []Category `json:"categories" gorm:"foreignKey:UserID"`
+	Categories  []Category   `json:"categories" gorm:"foreignKey:UserID"`
+	BudgetPlans []BudgetPlan `json:"budget_plans" gorm:"foreignKey:UserID"`
 }
 
 // LOGIN REQUEST PAYLOAD

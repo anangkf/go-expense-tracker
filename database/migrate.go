@@ -8,9 +8,12 @@ import (
 func AutoMigrate() {
 	err := DB.AutoMigrate(
 		&models.User{},
+		&models.RefreshToken{},
+		&models.BudgetPlan{},
+		&models.BucketType{},
+		&models.BudgetBucket{},
 		&models.Category{},
 		&models.Expense{},
-		&models.RefreshToken{},
 	)
 
 	if err != nil {

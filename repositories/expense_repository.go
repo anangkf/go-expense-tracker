@@ -4,6 +4,7 @@ import (
 	"go-expense-tracker-api/middleware"
 	"go-expense-tracker-api/models"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -90,4 +91,33 @@ func (r *ExpenseRepository) Update(expense *models.Expense) error {
 
 func (r *ExpenseRepository) Delete(expense *models.Expense) error {
 	return r.db.Delete(&expense).Error
+}
+
+func (r *ExpenseRepository) GetTotalIncomeAndExpenses(userID uint) (float64, float64, error) {
+	var totalIncome, totalExpenses float64
+	now := time.Now()
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	// CALCULATE TOTAL INCOME
+	if err := r.db.Model(&models.Expense{}).
+		Joins("JOIN categories ON categories.id = expenses.category_id").
+		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "income", startOfMonth, endOfMonth).
+		Select("COALESCE(SUM(expenses.amount), 0)").
+		Row().
+		Scan(&totalIncome); err != nil {
+		return 0, 0, err
+	}
+
+	// CALCULATE TOTAL EXPENSES
+	if err := r.db.Model(&models.Expense{}).
+		Joins("JOIN categories ON categories.id = expenses.category_id").
+		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "expense", startOfMonth, endOfMonth).
+		Select("COALESCE(SUM(expenses.amount), 0)").
+		Row().
+		Scan(&totalExpenses); err != nil {
+		return 0, 0, err
+	}
+
+	return totalIncome, totalExpenses, nil
 }

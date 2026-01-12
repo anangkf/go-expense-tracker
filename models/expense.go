@@ -3,14 +3,16 @@ package models
 import "time"
 
 type Expense struct {
-	ID         uint    `json:"id" gorm:"primaryKey, autoIncrement"`
-	Name       string  `json:"name"`
-	Amount     float64 `json:"amount"`
-	UserID     uint    `json:"-" gorm:"foreignKey:UserID;references:ID"`
-	CategoryID uint    `json:"-" gorm:"foreignKey:CategoryID;references:ID"`
+	ID           uint    `json:"id" gorm:"primaryKey, autoIncrement"`
+	Name         string  `json:"name"`
+	Amount       float64 `json:"amount"`
+	UserID       uint    `json:"-" gorm:"foreignKey:UserID;references:ID"`
+	CategoryID   uint    `json:"-" gorm:"foreignKey:CategoryID;references:ID"`
+	BucketTypeID *uint   `json:"-" gorm:"index"`
 
 	// RELATIONSHIPS
-	Category Category `json:"category" gorm:"foreignKey:CategoryID;references:ID"`
+	Category   Category   `json:"category" gorm:"foreignKey:CategoryID;references:ID"`
+	BucketType BucketType `json:"bucket_type" gorm:"foreignKey:BucketTypeID"`
 
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`

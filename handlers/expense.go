@@ -149,6 +149,10 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 		CategoryID: category.ID,
 	}
 
+	if category.Type == "expense" {
+		expense.BucketTypeID = category.BucketTypeID
+	}
+
 	// SAVE EXPENSE
 	if err := h.expenseRepo.Create(&expense); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to create expense")

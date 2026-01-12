@@ -48,9 +48,8 @@ func InitDatabase(cfg *config.Config) {
 
 	// AUTO MIGRATE DATABASE SCHEMAS
 	AutoMigrate()
-
 	// SEEDS DATA
-	SeedCategories()
+	Seed()
 
 	log.Println("Database connection successfully!")
 }
