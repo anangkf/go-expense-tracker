@@ -63,12 +63,12 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	// SETUP CORS MIDDLEWARE
 	router.Use(cors.New(cors.Config{
 		// AllowOrigins: []string{"http://localhost:3000", "https://your-production-domain.com"},
-		AllowAllOrigins: true, // for development only
-		AllowMethods:    []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:    []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:   []string{"Content-Length"},
-		// AllowCredentials: true,
-		MaxAge: 12 * time.Hour,
+		AllowOrigins:     []string{"*"}, // for development only
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	// INIT SERVICES
