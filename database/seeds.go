@@ -23,6 +23,7 @@ func seedBucketType() {
 
 	for _, t := range bucketTypes {
 		DB.FirstOrCreate(&t, models.BucketType{
+			ID:   t.ID,
 			Name: t.Name,
 		})
 	}
