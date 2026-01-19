@@ -2,27 +2,27 @@ basePath: /api/v1
 definitions:
   models.ActiveBudgetPlanResponse:
     properties:
-      budget_plan:
-        $ref: '#/definitions/models.BudgetPlan'
-      spending_by_bucket:
+      buckets:
         items:
-          $ref: '#/definitions/models.BucketSpending'
+          $ref: '#/definitions/models.BudgetBucketResponse'
         type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_template:
+        type: boolean
+      name:
+        type: string
       total_income:
         type: number
-    type: object
-  models.BucketSpending:
-    properties:
-      allocation_percentage:
-        type: number
-      bucket_name:
+      updated_at:
         type: string
-      max_allocation:
-        type: number
-      spending_percentage:
-        type: number
-      total_spending:
-        type: number
+      user_id:
+        description: Nullable for templates
+        type: integer
     type: object
   models.BucketType:
     properties:
@@ -70,6 +70,33 @@ definitions:
     - bucket_type_id
     - name
     - percentage
+    type: object
+  models.BudgetBucketResponse:
+    properties:
+      bucket_type:
+        allOf:
+        - $ref: '#/definitions/models.BucketType'
+        description: RELATIONSHIPS
+      bucket_type_id:
+        type: integer
+      budget_plan_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      max_allocation:
+        type: number
+      name:
+        type: string
+      percentage:
+        type: number
+      spending_percentage:
+        type: number
+      total_spending:
+        type: number
+      updated_at:
+        type: string
     type: object
   models.BudgetPlan:
     properties:
@@ -155,7 +182,6 @@ definitions:
         - income
         type: string
     required:
-    - bucket_type_id
     - name
     - type
     type: object
@@ -254,6 +280,39 @@ definitions:
         type: string
     type: object
   models.ExpenseRequest:
+    properties:
+      amount:
+        type: number
+      category_id:
+        type: integer
+      name:
+        type: string
+    required:
+    - amount
+    - name
+    type: object
+  models.ExpenseTemplate:
+    properties:
+      amount:
+        type: number
+      category:
+        allOf:
+        - $ref: '#/definitions/models.Category'
+        description: RELATIONSHIPS
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      is_default:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ExpenseTemplateRequest:
     properties:
       amount:
         type: number
@@ -411,6 +470,21 @@ definitions:
       total_pages:
         type: integer
     type: object
+  utils.PaginationResponse-array_models_ExpenseTemplate:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.ExpenseTemplate'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   utils.Response-any:
     properties:
       data: {}
@@ -439,6 +513,19 @@ definitions:
       data:
         items:
           $ref: '#/definitions/models.Category'
+        type: array
+      error:
+        type: boolean
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-array_models_ExpenseTemplate:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.ExpenseTemplate'
         type: array
       error:
         type: boolean
@@ -506,6 +593,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.Expense'
+      error:
+        type: boolean
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_ExpenseTemplate:
+    properties:
+      data:
+        $ref: '#/definitions/models.ExpenseTemplate'
       error:
         type: boolean
       message:
@@ -594,6 +692,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/utils.PaginationResponse-array_models_Expense'
+      error:
+        type: boolean
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.ResponseWithPagination-array_models_ExpenseTemplate:
+    properties:
+      data:
+        $ref: '#/definitions/utils.PaginationResponse-array_models_ExpenseTemplate'
       error:
         type: boolean
       message:
@@ -1282,6 +1391,283 @@ paths:
       summary: Create multiple categories
       tags:
       - categories
+  /expense-templates:
+    get:
+      consumes:
+      - application/json
+      description: Get expense templates for the current user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: limit
+        type: integer
+      - default: id
+        description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: asc
+        description: Sort order (asc or desc)
+        in: query
+        name: order
+        type: string
+      - description: Filter by category name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.ResponseWithPagination-array_models_ExpenseTemplate'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get expense templates
+      tags:
+      - expense-templates
+    post:
+      consumes:
+      - application/json
+      description: Create a new expense template for the current user
+      parameters:
+      - description: Expense Template
+        in: body
+        name: expense-template
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExpenseTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-models_ExpenseTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create expense template
+      tags:
+      - expense-templates
+  /expense-templates/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete expense template by ID
+      parameters:
+      - description: Expense Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_ExpenseTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Delete expense template
+      tags:
+      - expense-templates
+    get:
+      consumes:
+      - application/json
+      description: Get expense template by ID
+      parameters:
+      - description: Expense Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_ExpenseTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get expense template
+      tags:
+      - expense-templates
+    put:
+      consumes:
+      - application/json
+      description: Update expense template by ID
+      parameters:
+      - description: Expense Template ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Expense Template
+        in: body
+        name: expense-template
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExpenseTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_ExpenseTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Update expense template
+      tags:
+      - expense-templates
+  /expense-templates/default:
+    get:
+      consumes:
+      - application/json
+      description: Get default expense templates for the current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_ExpenseTemplate'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get default expense templates
+      tags:
+      - expense-templates
+  /expense-templates/multiple:
+    post:
+      consumes:
+      - application/json
+      description: Create multiple expense templates for the current user
+      parameters:
+      - description: Expense Templates
+        in: body
+        name: expense-templates
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.ExpenseTemplateRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response-array_models_ExpenseTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Create multiple expense templates
+      tags:
+      - expense-templates
   /expenses:
     get:
       consumes:

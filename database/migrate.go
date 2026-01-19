@@ -14,6 +14,7 @@ func AutoMigrate() {
 		&models.BudgetBucket{},
 		&models.Category{},
 		&models.Expense{},
+		&models.ExpenseTemplate{},
 	)
 
 	if err != nil {

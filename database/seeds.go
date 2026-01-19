@@ -10,6 +10,7 @@ func Seed() {
 	seedBucketType()
 	seedCategories()
 	seedBudgetPlanTemplates()
+	seedExpenseTemplates()
 }
 
 func seedBucketType() {
@@ -31,16 +32,21 @@ func seedCategories() {
 	bt1, bt2 := uint(1), uint(2)
 	categories := []models.Category{
 		// Expense
-		{Name: "Food", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{Name: "Transport", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{Name: "Health", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{Name: "Entertainment", Type: "expense", IsDefault: true, BucketTypeID: &bt2},
-		{Name: "Bills", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{Name: "Salary", Type: "income", IsDefault: true},
+		{ID: 1, Name: "Food", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 2, Name: "Transport", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 3, Name: "Health", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 4, Name: "Entertainment", Type: "expense", IsDefault: true, BucketTypeID: &bt2},
+		{ID: 5, Name: "Bills", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 6, Name: "Groceries", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 7, Name: "Savings", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
+		{ID: 8, Name: "Snack & Beverages", Type: "expense", IsDefault: true, BucketTypeID: &bt2},
+		// Income
+		{ID: 9, Name: "Salary", Type: "income", IsDefault: true},
 	}
 
 	for _, c := range categories {
 		DB.FirstOrCreate(&c, models.Category{
+			ID:        c.ID,
 			Name:      c.Name,
 			IsDefault: true,
 			UserID:    nil,
@@ -88,6 +94,29 @@ func seedBudgetPlanTemplates() {
 				}
 			}
 			return nil
+		})
+	}
+}
+
+func seedExpenseTemplates() {
+	catFood, catTransport, catBills, catGroceries, catSavings, catSnackBeverages := uint(1), uint(2), uint(5), uint(6), uint(7), uint(8)
+	bt1, bt2, bt3 := uint(1), uint(2), uint(3)
+
+	templates := []models.ExpenseTemplate{
+		{Name: "Makan", CategoryID: &catFood, BucketTypeID: &bt1},
+		{Name: "Parkir", CategoryID: &catTransport, BucketTypeID: &bt1},
+		{Name: "Internet", CategoryID: &catBills, BucketTypeID: &bt1},
+		{Name: "Ojol", CategoryID: &catTransport, BucketTypeID: &bt1},
+		{Name: "Bayar Kos", CategoryID: &catBills, BucketTypeID: &bt1},
+		{Name: "Kopi", CategoryID: &catSnackBeverages, BucketTypeID: &bt2},
+		{Name: "Belanja", CategoryID: &catGroceries, BucketTypeID: &bt1},
+		{Name: "Menabung", CategoryID: &catSavings, BucketTypeID: &bt3},
+	}
+
+	for _, t := range templates {
+		DB.FirstOrCreate(&t, models.ExpenseTemplate{
+			Name:      t.Name,
+			IsDefault: true,
 		})
 	}
 }

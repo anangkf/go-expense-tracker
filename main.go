@@ -80,6 +80,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	expenseRepo := repositories.NewExpenseRepository(database.DB)
 	refreshTokenRepo := repositories.NewRefreshTokenRepository(database.DB)
 	budgetPlanRepo := repositories.NewBudgetPlanRepository(database.DB)
+	expenseTemplateRepo := repositories.NewExpenseTemplateRepository(database.DB)
 
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, jwtServices)
@@ -87,14 +88,15 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
 	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo, expenseRepo)
+	expenseTemplateHandler := handlers.NewExpenseTemplateHandler(expenseTemplateRepo, categoryRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler, userRepo)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler, expenseTemplateHandler, userRepo)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler, userRepo *repositories.UserRepository) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler, expenseTemplateHandler *handlers.ExpenseTemplateHandler, userRepo *repositories.UserRepository) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -152,5 +154,15 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		expense.POST("/", expenseHandler.CreateExpense)
 		expense.PUT("/:id", expenseHandler.UpdateExpense)
 		expense.DELETE("/:id", expenseHandler.DeleteExpense)
+
+		// EXPENSE TEMPLATE ROUTES
+		expenseTemplate := protected.Group("/expense-templates")
+		expenseTemplate.GET("/default", expenseTemplateHandler.GetDefaultTemplates)
+		expenseTemplate.GET("/", expenseTemplateHandler.GetExpenseTemplates)
+		expenseTemplate.GET("/:id", expenseTemplateHandler.GetExpenseTemplate)
+		expenseTemplate.POST("/", expenseTemplateHandler.CreateExpenseTemplate)
+		expenseTemplate.POST("/multiple", expenseTemplateHandler.CreateMultipleExpenseTemplates)
+		expenseTemplate.PUT("/:id", expenseTemplateHandler.UpdateExpenseTemplate)
+		expenseTemplate.DELETE("/:id", expenseTemplateHandler.DeleteExpenseTemplate)
 	}
 }
