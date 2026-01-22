@@ -13,6 +13,7 @@ type Category struct {
 	Type         string         `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
 	IsDefault    bool           `json:"is_default" gorm:"index"`
 	BucketTypeID *uint          `gorm:"index" json:"bucket_type_id,omitempty"`
+	IconName     string         `json:"icon_name" validate:"required"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
@@ -32,6 +33,7 @@ type CategoryRequest struct {
 	BucketTypeID *uint  `json:"bucket_type_id,omitempty"`
 	Name         string `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
 	Type         string `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
+	IconName     string `json:"icon_name" validate:"required"`
 }
 
 type DeleteCategoryResponse struct {
@@ -40,6 +42,7 @@ type DeleteCategoryResponse struct {
 	UserID    *uint     `json:"-" gorm:"index"`
 	Type      string    `json:"type" gorm:"not null" validate:"required,oneof=expense income"`
 	IsDefault bool      `json:"is_default" gorm:"index"`
+	IconName  string    `json:"icon_name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at,omitempty" gorm:"index"`

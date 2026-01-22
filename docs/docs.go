@@ -2074,6 +2074,7 @@ const docTemplate = `{
         "models.Category": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name",
                 "type"
             ],
@@ -2090,6 +2091,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "icon_name": {
                     "type": "string"
                 },
                 "id": {
@@ -2118,12 +2122,16 @@ const docTemplate = `{
         "models.CategoryRequest": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name",
                 "type"
             ],
             "properties": {
                 "bucket_type_id": {
                     "type": "integer"
+                },
+                "icon_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
@@ -2226,6 +2234,9 @@ const docTemplate = `{
                 "deleted_at": {
                     "type": "string"
                 },
+                "icon_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2318,9 +2329,6 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "deleted_at": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -2338,7 +2346,6 @@ const docTemplate = `{
         "models.ExpenseTemplateRequest": {
             "type": "object",
             "required": [
-                "amount",
                 "name"
             ],
             "properties": {

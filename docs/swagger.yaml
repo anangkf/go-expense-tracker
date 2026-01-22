@@ -149,6 +149,8 @@ definitions:
         type: integer
       created_at:
         type: string
+      icon_name:
+        type: string
       id:
         type: integer
       is_default:
@@ -165,6 +167,7 @@ definitions:
       updated_at:
         type: string
     required:
+    - icon_name
     - name
     - type
     type: object
@@ -172,6 +175,8 @@ definitions:
     properties:
       bucket_type_id:
         type: integer
+      icon_name:
+        type: string
       name:
         maxLength: 100
         minLength: 2
@@ -182,6 +187,7 @@ definitions:
         - income
         type: string
     required:
+    - icon_name
     - name
     - type
     type: object
@@ -238,6 +244,8 @@ definitions:
       created_at:
         type: string
       deleted_at:
+        type: string
+      icon_name:
         type: string
       id:
         type: integer
@@ -301,8 +309,6 @@ definitions:
         description: RELATIONSHIPS
       created_at:
         type: string
-      deleted_at:
-        type: string
       id:
         type: integer
       is_default:
@@ -321,7 +327,6 @@ definitions:
       name:
         type: string
     required:
-    - amount
     - name
     type: object
   models.LoginRequest:

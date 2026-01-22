@@ -143,6 +143,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		Type:         req.Type,
 		IsDefault:    false,
 		BucketTypeID: req.BucketTypeID,
+		IconName:     req.IconName,
 	}
 	categories := []*models.Category{category}
 
@@ -205,6 +206,7 @@ func (h *CategoryHandler) CreateMultipleCategories(c *gin.Context) {
 			Type:         item.Type,
 			IsDefault:    false,
 			BucketTypeID: item.BucketTypeID,
+			IconName:     item.IconName,
 		})
 	}
 
@@ -319,6 +321,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	// UPDATE CATEGORY
 	category.Name = req.Name
 	category.Type = req.Type
+	category.BucketTypeID = req.BucketTypeID
+	category.IconName = req.IconName
 
 	if err := h.categoryRepo.Update(category); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to update category")
