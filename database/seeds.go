@@ -33,16 +33,16 @@ func seedCategories() {
 	bt1, bt2 := uint(1), uint(2)
 	categories := []models.Category{
 		// Expense
-		{ID: 1, Name: "Food", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 2, Name: "Transport", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 3, Name: "Health", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 4, Name: "Entertainment", Type: "expense", IsDefault: true, BucketTypeID: &bt2},
-		{ID: 5, Name: "Bills", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 6, Name: "Groceries", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 7, Name: "Savings", Type: "expense", IsDefault: true, BucketTypeID: &bt1},
-		{ID: 8, Name: "Snack & Beverages", Type: "expense", IsDefault: true, BucketTypeID: &bt2},
+		{ID: 1, Name: "Food", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "beef"},
+		{ID: 2, Name: "Transport", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "bus-front"},
+		{ID: 3, Name: "Health", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "heart-pulse"},
+		{ID: 4, Name: "Entertainment", Type: "expense", IsDefault: true, BucketTypeID: &bt2, IconName: "film"},
+		{ID: 5, Name: "Bills", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "receipt"},
+		{ID: 6, Name: "Groceries", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "shopping-bag"},
+		{ID: 7, Name: "Savings", Type: "expense", IsDefault: true, BucketTypeID: &bt1, IconName: "hand-coins"},
+		{ID: 8, Name: "Snack & Beverages", Type: "expense", IsDefault: true, BucketTypeID: &bt2, IconName: "hamburger"},
 		// Income
-		{ID: 9, Name: "Salary", Type: "income", IsDefault: true},
+		{ID: 9, Name: "Salary", Type: "income", IsDefault: true, IconName: "wallet"},
 	}
 
 	for _, c := range categories {

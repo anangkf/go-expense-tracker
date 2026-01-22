@@ -2067,6 +2067,7 @@
         "models.Category": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name",
                 "type"
             ],
@@ -2083,6 +2084,9 @@
                     "type": "integer"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "icon_name": {
                     "type": "string"
                 },
                 "id": {
@@ -2111,12 +2115,16 @@
         "models.CategoryRequest": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name",
                 "type"
             ],
             "properties": {
                 "bucket_type_id": {
                     "type": "integer"
+                },
+                "icon_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
@@ -2219,6 +2227,9 @@
                 "deleted_at": {
                     "type": "string"
                 },
+                "icon_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2311,9 +2322,6 @@
                 "created_at": {
                     "type": "string"
                 },
-                "deleted_at": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -2331,7 +2339,6 @@
         "models.ExpenseTemplateRequest": {
             "type": "object",
             "required": [
-                "amount",
                 "name"
             ],
             "properties": {
