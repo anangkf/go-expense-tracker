@@ -14,6 +14,7 @@ type ExpenseTemplate struct {
 	UserID       *uint   `json:"-" gorm:"foreignKey:UserID;references:ID;index"`
 	CategoryID   *uint   `json:"-" gorm:"foreignKey:CategoryID;references:ID"`
 	BucketTypeID *uint   `json:"-" gorm:"index"`
+	IconName     string  `json:"icon_name" validate:"required"`
 
 	// RELATIONSHIPS
 	Category Category `json:"category" gorm:"foreignKey:CategoryID;references:ID"`
@@ -35,4 +36,5 @@ type ExpenseTemplateRequest struct {
 	Name       string  `json:"name" validate:"required"`
 	Amount     float64 `json:"amount"`
 	CategoryID uint    `json:"category_id,omitempty"`
+	IconName   string  `json:"icon_name" validate:"required"`
 }

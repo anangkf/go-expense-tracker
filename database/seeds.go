@@ -104,14 +104,14 @@ func seedExpenseTemplates() {
 	bt1, bt2, bt3 := uint(1), uint(2), uint(3)
 
 	templates := []models.ExpenseTemplate{
-		{Name: "Makan", CategoryID: &catFood, BucketTypeID: &bt1},
-		{Name: "Parkir", CategoryID: &catTransport, BucketTypeID: &bt1},
-		{Name: "Internet", CategoryID: &catBills, BucketTypeID: &bt1},
-		{Name: "Ojol", CategoryID: &catTransport, BucketTypeID: &bt1},
-		{Name: "Bayar Kos", CategoryID: &catBills, BucketTypeID: &bt1},
-		{Name: "Kopi", CategoryID: &catSnackBeverages, BucketTypeID: &bt2},
-		{Name: "Belanja", CategoryID: &catGroceries, BucketTypeID: &bt1},
-		{Name: "Menabung", CategoryID: &catSavings, BucketTypeID: &bt3},
+		{Name: "Makan", CategoryID: &catFood, BucketTypeID: &bt1, IconName: "ham"},
+		{Name: "Parkir", CategoryID: &catTransport, BucketTypeID: &bt1, IconName: "square-parking"},
+		{Name: "Internet", CategoryID: &catBills, BucketTypeID: &bt1, IconName: "wifi"},
+		{Name: "Ojol", CategoryID: &catTransport, BucketTypeID: &bt1, IconName: "motorbike"},
+		{Name: "Bayar Kos", CategoryID: &catBills, BucketTypeID: &bt1, IconName: "house"},
+		{Name: "Kopi", CategoryID: &catSnackBeverages, BucketTypeID: &bt2, IconName: "coffee"},
+		{Name: "Belanja", CategoryID: &catGroceries, BucketTypeID: &bt1, IconName: "shopping-cart"},
+		{Name: "Menabung", CategoryID: &catSavings, BucketTypeID: &bt3, IconName: "hand-coins"},
 	}
 
 	for _, t := range templates {

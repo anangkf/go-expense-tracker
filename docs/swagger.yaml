@@ -309,6 +309,8 @@ definitions:
         description: RELATIONSHIPS
       created_at:
         type: string
+      icon_name:
+        type: string
       id:
         type: integer
       is_default:
@@ -317,6 +319,8 @@ definitions:
         type: string
       updated_at:
         type: string
+    required:
+    - icon_name
     type: object
   models.ExpenseTemplateRequest:
     properties:
@@ -324,9 +328,12 @@ definitions:
         type: number
       category_id:
         type: integer
+      icon_name:
+        type: string
       name:
         type: string
     required:
+    - icon_name
     - name
     type: object
   models.LoginRequest:

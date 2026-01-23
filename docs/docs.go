@@ -2314,6 +2314,9 @@ const docTemplate = `{
         },
         "models.ExpenseTemplate": {
             "type": "object",
+            "required": [
+                "icon_name"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -2327,6 +2330,9 @@ const docTemplate = `{
                     ]
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "icon_name": {
                     "type": "string"
                 },
                 "id": {
@@ -2346,6 +2352,7 @@ const docTemplate = `{
         "models.ExpenseTemplateRequest": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name"
             ],
             "properties": {
@@ -2354,6 +2361,9 @@ const docTemplate = `{
                 },
                 "category_id": {
                     "type": "integer"
+                },
+                "icon_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
