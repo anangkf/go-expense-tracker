@@ -2307,6 +2307,9 @@
         },
         "models.ExpenseTemplate": {
             "type": "object",
+            "required": [
+                "icon_name"
+            ],
             "properties": {
                 "amount": {
                     "type": "number"
@@ -2320,6 +2323,9 @@
                     ]
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "icon_name": {
                     "type": "string"
                 },
                 "id": {
@@ -2339,6 +2345,7 @@
         "models.ExpenseTemplateRequest": {
             "type": "object",
             "required": [
+                "icon_name",
                 "name"
             ],
             "properties": {
@@ -2347,6 +2354,9 @@
                 },
                 "category_id": {
                     "type": "integer"
+                },
+                "icon_name": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

@@ -151,6 +151,7 @@ func (h *ExpenseTemplateHandler) CreateExpenseTemplate(c *gin.Context) {
 		Name:         req.Name,
 		Amount:       req.Amount,
 		BucketTypeID: category.BucketTypeID,
+		IconName:     req.IconName,
 	}
 	templates := []*models.ExpenseTemplate{template}
 
@@ -225,6 +226,7 @@ func (h *ExpenseTemplateHandler) CreateMultipleExpenseTemplates(c *gin.Context) 
 			Amount:       req.Amount,
 			BucketTypeID: category.BucketTypeID,
 			Category:     *category,
+			IconName:     req.IconName,
 		}
 		templates = append(templates, template)
 	}
@@ -367,6 +369,7 @@ func (g *ExpenseTemplateHandler) UpdateExpenseTemplate(c *gin.Context) {
 	template.Amount = req.Amount
 	template.CategoryID = &req.CategoryID
 	template.BucketTypeID = category.BucketTypeID
+	template.IconName = req.IconName
 
 	// SAVE CHANGES
 	if err := g.templateRepo.Update(template); err != nil {
