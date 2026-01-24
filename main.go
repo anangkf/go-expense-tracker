@@ -129,9 +129,9 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		// BUDGET PLAN ROUTES
 		budgetPlan := protected.Group("/budget-plans")
 		budgetPlan.GET("/templates", budgetPlanHandler.GetBudgetPlanTemplates)
-		budgetPlan.GET("/", budgetPlanHandler.GetBudgetPlans)
+		budgetPlan.GET("", budgetPlanHandler.GetBudgetPlans)
 		budgetPlan.GET("/active", budgetPlanHandler.GetActiveBudgetPlan)
-		budgetPlan.POST("/", budgetPlanHandler.CreateBudgetPlan)
+		budgetPlan.POST("", budgetPlanHandler.CreateBudgetPlan)
 		budgetPlan.POST("/:id/set-active", budgetPlanHandler.SetActiveBudgetPlan)
 		budgetPlan.GET("/:id", budgetPlanHandler.GetBudgetPlan)
 		budgetPlan.PUT("/:id", budgetPlanHandler.UpdateBudgetPlan)
@@ -139,28 +139,28 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 
 		// CATEGORY ROUTES
 		category := protected.Group("/categories")
-		category.GET("/", categoryHandler.GetCategoriesByUserID)
+		category.GET("", categoryHandler.GetCategoriesByUserID)
 		category.GET("/default", categoryHandler.GetDefaultCategories)
 		category.GET("/:id", categoryHandler.GetCategoryByID)
-		category.POST("/", categoryHandler.CreateCategory)
+		category.POST("", categoryHandler.CreateCategory)
 		category.POST("/multiple", categoryHandler.CreateMultipleCategories)
 		category.PUT("/:id", categoryHandler.UpdateCategory)
 		category.DELETE("/:id", categoryHandler.DeleteCategory)
 
 		// EXPENSE ROUTES
 		expense := protected.Group("/expenses")
-		expense.GET("/", expenseHandler.GetExpensesByUserID)
+		expense.GET("", expenseHandler.GetExpensesByUserID)
 		expense.GET("/:id", expenseHandler.GetExpenseByID)
-		expense.POST("/", expenseHandler.CreateExpense)
+		expense.POST("", expenseHandler.CreateExpense)
 		expense.PUT("/:id", expenseHandler.UpdateExpense)
 		expense.DELETE("/:id", expenseHandler.DeleteExpense)
 
 		// EXPENSE TEMPLATE ROUTES
 		expenseTemplate := protected.Group("/expense-templates")
 		expenseTemplate.GET("/default", expenseTemplateHandler.GetDefaultTemplates)
-		expenseTemplate.GET("/", expenseTemplateHandler.GetExpenseTemplates)
+		expenseTemplate.GET("", expenseTemplateHandler.GetExpenseTemplates)
 		expenseTemplate.GET("/:id", expenseTemplateHandler.GetExpenseTemplate)
-		expenseTemplate.POST("/", expenseTemplateHandler.CreateExpenseTemplate)
+		expenseTemplate.POST("", expenseTemplateHandler.CreateExpenseTemplate)
 		expenseTemplate.POST("/multiple", expenseTemplateHandler.CreateMultipleExpenseTemplates)
 		expenseTemplate.PUT("/:id", expenseTemplateHandler.UpdateExpenseTemplate)
 		expenseTemplate.DELETE("/:id", expenseTemplateHandler.DeleteExpenseTemplate)
