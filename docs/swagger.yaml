@@ -159,6 +159,8 @@ definitions:
         maxLength: 100
         minLength: 2
         type: string
+      total_expense:
+        type: number
       type:
         enum:
         - expense
@@ -277,8 +279,6 @@ definitions:
         - $ref: '#/definitions/models.Category'
         description: RELATIONSHIPS
       created_at:
-        type: string
-      deleted_at:
         type: string
       id:
         type: integer
@@ -1180,6 +1180,27 @@ paths:
         in: query
         name: type
         type: string
+      - description: Filter by categories created start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by categories created end date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by expense created start date (YYYY-MM-DD)
+        in: query
+        name: expense_start_date
+        type: string
+      - description: Filter by expense created end date (YYYY-MM-DD)
+        in: query
+        name: expense_end_date
+        type: string
+      - default: false
+        description: Include total expense per category
+        in: query
+        name: withTotal
+        type: boolean
       produces:
       - application/json
       responses:

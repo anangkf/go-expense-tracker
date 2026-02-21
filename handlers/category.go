@@ -38,6 +38,11 @@ func NewCategoryHandler(categoryRepo *repositories.CategoryRepository, userRepo 
 // @Param order query string false "Sort order (asc or desc)" default(asc)
 // @Param name query string false "Filter by category name"
 // @Param type query string false "Filter by category type"
+// @Param start_date query string false "Filter by categories created start date (YYYY-MM-DD)"
+// @Param end_date query string false "Filter by categories created end date (YYYY-MM-DD)"
+// @Param expense_start_date query string false "Filter by expense created start date (YYYY-MM-DD)"
+// @Param expense_end_date query string false "Filter by expense created end date (YYYY-MM-DD)"
+// @Param withTotal query bool false "Include total expense per category" default(false)
 // @Success 200 {object} utils.ResponseWithPagination[[]models.Category]
 // @Failure 401 {object} utils.Response[any]
 // @Failure 500 {object} utils.Response[any]
@@ -53,9 +58,10 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 
 	// GET QUERY PARAMETERS
 	queryParams, _ := c.Get("queryParams")
+	withTotal, _ := strconv.ParseBool(c.DefaultQuery("withTotal", "false"))
 
 	// GET CATEGORIES BY USER ID
-	categories, total, totalPages, err := h.categoryRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams))
+	categories, total, totalPages, err := h.categoryRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams), withTotal)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get categories")
 		return
