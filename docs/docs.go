@@ -717,6 +717,37 @@ const docTemplate = `{
                         "description": "Filter by category type",
                         "name": "type",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by categories created start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by categories created end date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by expense created start date (YYYY-MM-DD)",
+                        "name": "expense_start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by expense created end date (YYYY-MM-DD)",
+                        "name": "expense_end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Include total expense per category",
+                        "name": "withTotal",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2107,6 +2138,9 @@ const docTemplate = `{
                     "maxLength": 100,
                     "minLength": 2
                 },
+                "total_expense": {
+                    "type": "number"
+                },
                 "type": {
                     "type": "string",
                     "enum": [
@@ -2278,9 +2312,6 @@ const docTemplate = `{
                     ]
                 },
                 "created_at": {
-                    "type": "string"
-                },
-                "deleted_at": {
                     "type": "string"
                 },
                 "id": {

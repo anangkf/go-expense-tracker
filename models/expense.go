@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Expense struct {
 	ID           uint    `json:"id" gorm:"primaryKey, autoIncrement"`
@@ -14,9 +18,9 @@ type Expense struct {
 	Category   Category   `json:"category" gorm:"foreignKey:CategoryID;references:ID"`
 	BucketType BucketType `json:"bucket_type" gorm:"foreignKey:BucketTypeID"`
 
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt time.Time `json:"deleted_at" gorm:"index"`
+	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type ExpenseReponse struct {

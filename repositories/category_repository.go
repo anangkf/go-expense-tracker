@@ -4,6 +4,7 @@ import (
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/utils"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -31,16 +32,24 @@ func (r *CategoryRepository) CreateMany(categories []*models.Category) error {
 	return r.db.Create(categories).Error
 }
 
-func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryParams) (*[]models.Category, int64, int64, error) {
+func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryParams, withTotal bool) (*[]models.Category, int64, int64, error) {
 	var categories []models.Category
 	var total int64
 
-	query := r.db.Model(&models.Category{}).Where("user_id = ?", userID)
+	query := r.db.Model(&models.Category{}).Where("categories.user_id = ?", userID)
 
 	// APPLY FILTERS
 	for key, value := range queryParams.Filters {
 		if value != "" {
-			query = query.Where(key+" ILIKE ?", "%"+value+"%")
+			if key == "start_date" {
+				query = query.Where("categories.created_at >= ?", value)
+				continue
+			}
+			if key == "end_date" {
+				query = query.Where("categories.created_at <= ?", value)
+				continue
+			}
+			query = query.Where("categories."+key+" ILIKE ?", "%"+value+"%")
 		}
 	}
 
@@ -61,7 +70,28 @@ func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryPar
 		if strings.ToLower(queryParams.Order) == "desc" {
 			order = "desc"
 		}
-		query = query.Order(queryParams.SortBy + " " + order)
+		query = query.Order("categories." + queryParams.SortBy + " " + order)
+	}
+
+	if withTotal {
+		expenseStartDate := queryParams.ExpenseStartDate
+		expenseEndDate := queryParams.ExpenseEndDate
+
+		if expenseStartDate == "" || expenseEndDate == "" {
+			// DEFAULT EXPENSE DATE RANGE
+			now := time.Now()
+			firstDayOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+			lastDayOfMonth := firstDayOfMonth.AddDate(0, 1, -1)
+
+			expenseStartDate = firstDayOfMonth.Format("2006-01-02")
+			expenseEndDate = lastDayOfMonth.Format("2006-01-02")
+		}
+
+		joinCondition := "LEFT JOIN expenses ON expenses.category_id = categories.id AND expenses.user_id = ? AND expenses.deleted_at IS NULL AND expenses.created_at BETWEEN ? AND ?"
+		query = query.
+			Select("categories.*, COALESCE(SUM(expenses.amount), 0) AS total_expense").
+			Joins(joinCondition, userID, expenseStartDate+" 00:00:00", expenseEndDate+" 23:59:59").
+			Group("categories.id")
 	}
 
 	// APPLY PAGINATION
@@ -69,7 +99,6 @@ func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryPar
 	if err := query.Limit(queryParams.Limit).Offset(offset).Find(&categories).Error; err != nil {
 		return nil, 0, 0, err
 	}
-
 	return &categories, total, totalPages, nil
 }
 
