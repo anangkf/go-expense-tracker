@@ -14,13 +14,17 @@ type Category struct {
 	IsDefault    bool           `json:"is_default" gorm:"index"`
 	BucketTypeID *uint          `gorm:"index" json:"bucket_type_id,omitempty"`
 	IconName     string         `json:"icon_name" validate:"required"`
-	TotalExpense *float64       `json:"total_expense,omitempty" gorm:"-:migration"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// RELATIONSHIPS
 	BucketType BucketType `gorm:"foreignKey:BucketTypeID" json:"bucket_type"`
+}
+
+type CategoryWithTotal struct {
+	Category
+	TotalExpense float64 `json:"total_expense"`
 }
 
 type CategoryReponse struct {

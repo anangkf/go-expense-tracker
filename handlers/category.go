@@ -60,8 +60,17 @@ func (h *CategoryHandler) GetCategoriesByUserID(c *gin.Context) {
 	queryParams, _ := c.Get("queryParams")
 	withTotal, _ := strconv.ParseBool(c.DefaultQuery("withTotal", "false"))
 
+	var total int64
+	var totalPages int64
+	var err error
+	var categories any
+
 	// GET CATEGORIES BY USER ID
-	categories, total, totalPages, err := h.categoryRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams), withTotal)
+	if withTotal {
+		categories, total, totalPages, err = h.categoryRepo.GetByUserIDWithTotal(userID.(uint), queryParams.(utils.QueryParams))
+	} else {
+		categories, total, totalPages, err = h.categoryRepo.GetByUserID(userID.(uint), queryParams.(utils.QueryParams))
+	}
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get categories")
 		return
