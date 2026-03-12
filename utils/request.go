@@ -19,7 +19,7 @@ type QueryParams struct {
 }
 
 func GetUserIDFromContext(c *gin.Context) (uint, error) {
-	userID, exists := c.Get("userID")
+	userID, exists := c.Get("user_id")
 	if !exists {
 		return 0, errors.New("user ID not found in context")
 	}

@@ -1091,6 +1091,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get the dashboard overview for the authenticated user, including total expenses, categories, and daily expenses",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get dashboard overview",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date for the dashboard period (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date for the dashboard period (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-models_DashboardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
         "/expense-templates": {
             "get": {
                 "security": [
@@ -2138,9 +2198,6 @@ const docTemplate = `{
                     "maxLength": 100,
                     "minLength": 2
                 },
-                "total_expense": {
-                    "type": "number"
-                },
                 "type": {
                     "type": "string",
                     "enum": [
@@ -2178,6 +2235,31 @@ const docTemplate = `{
                         "expense",
                         "income"
                     ]
+                }
+            }
+        },
+        "models.DailyExpense": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.DashboardResponse": {
+            "type": "object",
+            "properties": {
+                "daily_expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DailyExpense"
+                    }
+                },
+                "overview": {
+                    "$ref": "#/definitions/models.Overview"
                 }
             }
         },
@@ -2424,6 +2506,20 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Overview": {
+            "type": "object",
+            "properties": {
+                "left_in_budget": {
+                    "type": "number"
+                },
+                "this_week_spent": {
+                    "type": "number"
+                },
+                "total_spent": {
+                    "type": "number"
                 }
             }
         },
@@ -2757,6 +2853,23 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/models.Category"
+                },
+                "error": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "utils.Response-models_DashboardResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/models.DashboardResponse"
                 },
                 "error": {
                     "type": "boolean"

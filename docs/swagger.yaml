@@ -159,8 +159,6 @@ definitions:
         maxLength: 100
         minLength: 2
         type: string
-      total_expense:
-        type: number
       type:
         enum:
         - expense
@@ -192,6 +190,22 @@ definitions:
     - icon_name
     - name
     - type
+    type: object
+  models.DailyExpense:
+    properties:
+      date:
+        type: string
+      total_amount:
+        type: number
+    type: object
+  models.DashboardResponse:
+    properties:
+      daily_expenses:
+        items:
+          $ref: '#/definitions/models.DailyExpense'
+        type: array
+      overview:
+        $ref: '#/definitions/models.Overview'
     type: object
   models.DeleteBudgetBucketResponse:
     properties:
@@ -352,6 +366,15 @@ definitions:
         type: string
       token:
         type: string
+    type: object
+  models.Overview:
+    properties:
+      left_in_budget:
+        type: number
+      this_week_spent:
+        type: number
+      total_spent:
+        type: number
     type: object
   models.RefreshTokenRequest:
     properties:
@@ -572,6 +595,17 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/models.Category'
+      error:
+        type: boolean
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  utils.Response-models_DashboardResponse:
+    properties:
+      data:
+        $ref: '#/definitions/models.DashboardResponse'
       error:
         type: boolean
       message:
@@ -1424,6 +1458,45 @@ paths:
       summary: Create multiple categories
       tags:
       - categories
+  /dashboard:
+    get:
+      consumes:
+      - application/json
+      description: Get the dashboard overview for the authenticated user, including
+        total expenses, categories, and daily expenses
+      parameters:
+      - description: Start date for the dashboard period (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: End date for the dashboard period (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-models_DashboardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Get dashboard overview
+      tags:
+      - dashboard
   /expense-templates:
     get:
       consumes:
