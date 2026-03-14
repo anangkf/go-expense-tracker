@@ -50,13 +50,8 @@ func (r *ExpenseRepository) GetByUserID(userID uint, queryParams utils.QueryPara
 	}
 
 	// APPLY SORTING
-	if queryParams.SortBy != "" {
-		order := "asc"
-		if strings.ToLower(queryParams.Order) == "desc" {
-			order = "desc"
-		}
-		query = query.Order(queryParams.SortBy + " " + order)
-	}
+	order := strings.ToLower(queryParams.Order)
+	query = query.Order(queryParams.SortBy + " " + order)
 
 	// APPLY PAGINATION
 	offset := (queryParams.Page - 1) * queryParams.Limit
@@ -93,16 +88,25 @@ func (r *ExpenseRepository) Delete(expense *models.Expense) error {
 	return r.db.Delete(&expense).Error
 }
 
-func (r *ExpenseRepository) GetTotalIncomeAndExpenses(userID uint) (float64, float64, error) {
+func (r *ExpenseRepository) GetTotalIncomeAndExpenses(userID uint, queryParams utils.QueryParams) (float64, float64, error) {
 	var totalIncome, totalExpenses float64
-	now := time.Now()
-	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+	expenseStartDate := queryParams.ExpenseStartDate
+	expenseEndDate := queryParams.ExpenseEndDate
+
+	if expenseStartDate == "" || expenseEndDate == "" {
+		// DEFAULT EXPENSE DATE RANGE
+		now := time.Now()
+		firstDayOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		lastDayOfMonth := firstDayOfMonth.AddDate(0, 1, -1)
+
+		expenseStartDate = firstDayOfMonth.Format("2006-01-02")
+		expenseEndDate = lastDayOfMonth.Format("2006-01-02")
+	}
 
 	// CALCULATE TOTAL INCOME
 	if err := r.db.Model(&models.Expense{}).
 		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "income", startOfMonth, endOfMonth).
+		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "income", expenseStartDate, expenseEndDate).
 		Select("COALESCE(SUM(expenses.amount), 0)").
 		Row().
 		Scan(&totalIncome); err != nil {
@@ -112,7 +116,7 @@ func (r *ExpenseRepository) GetTotalIncomeAndExpenses(userID uint) (float64, flo
 	// CALCULATE TOTAL EXPENSES
 	if err := r.db.Model(&models.Expense{}).
 		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "expense", startOfMonth, endOfMonth).
+		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "expense", expenseStartDate, expenseEndDate).
 		Select("COALESCE(SUM(expenses.amount), 0)").
 		Row().
 		Scan(&totalExpenses); err != nil {

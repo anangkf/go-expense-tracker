@@ -81,6 +81,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	refreshTokenRepo := repositories.NewRefreshTokenRepository(database.DB)
 	budgetPlanRepo := repositories.NewBudgetPlanRepository(database.DB)
 	expenseTemplateRepo := repositories.NewExpenseTemplateRepository(database.DB)
+	dashboardRepo := repositories.NewDashboardRepository(database.DB)
 
 	// INIT HANDLERS
 	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, jwtServices)
@@ -89,14 +90,15 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
 	budgetPlanHandler := handlers.NewBudgetPlanHandler(budgetPlanRepo, userRepo, expenseRepo)
 	expenseTemplateHandler := handlers.NewExpenseTemplateHandler(expenseTemplateRepo, categoryRepo)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardRepo, userRepo)
 
 	// SETUP ROUTES
-	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler, expenseTemplateHandler, userRepo)
+	setupRoutes(router, authHandler, userHandler, categoryHandler, expenseHandler, jwtServices, budgetPlanHandler, expenseTemplateHandler, dashboardHandler, userRepo)
 
 	return router
 }
 
-func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler, expenseTemplateHandler *handlers.ExpenseTemplateHandler, userRepo *repositories.UserRepository) {
+func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, categoryHandler *handlers.CategoryHandler, expenseHandler *handlers.ExpenseHandler, jwtService *services.JWTService, budgetPlanHandler *handlers.BudgetPlanHandler, expenseTemplateHandler *handlers.ExpenseTemplateHandler, dashbboardHandler *handlers.DashboardHandler, userRepo *repositories.UserRepository) {
 	// HEALTH CHECK
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK", "message": "Expense Tracker API is running!"})
@@ -165,4 +167,8 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 		expenseTemplate.PUT("/:id", expenseTemplateHandler.UpdateExpenseTemplate)
 		expenseTemplate.DELETE("/:id", expenseTemplateHandler.DeleteExpenseTemplate)
 	}
+
+	// DASHBOARD ROUTES
+	dashboard := protected.Group("/dashboard")
+	dashboard.GET("", dashbboardHandler.GetDashboard)
 }

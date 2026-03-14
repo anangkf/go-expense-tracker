@@ -485,6 +485,8 @@ func (h *BudgetPlanHandler) GetActiveBudgetPlan(c *gin.Context) {
 		utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
 		return
 	}
+	// GET QUERY PARAMS
+	queryParams, _ := c.Get("queryParams")
 
 	// GET USER
 	user, err := h.userRepo.GetByID(userID.(uint))
@@ -511,7 +513,7 @@ func (h *BudgetPlanHandler) GetActiveBudgetPlan(c *gin.Context) {
 	}
 
 	// GET TOTAL INCOME
-	totalIncome, totalExpenses, err := h.expenseRepo.GetTotalIncomeAndExpenses(user.ID)
+	totalIncome, totalExpenses, err := h.expenseRepo.GetTotalIncomeAndExpenses(user.ID, queryParams.(utils.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get total income")
 		return
@@ -519,7 +521,7 @@ func (h *BudgetPlanHandler) GetActiveBudgetPlan(c *gin.Context) {
 	fmt.Printf("Total Income: %.2f, Total Expenses: %.2f\n", totalIncome, totalExpenses)
 
 	// GET TOTAL SPENDING FOR EACH BUCKET
-	spendingByBucket, err := h.budgetPlanRepo.GetTotalSpendingByBucket(*user.ActiveBudgetPlanID, user.ID)
+	spendingByBucket, err := h.budgetPlanRepo.GetTotalSpendingByBucket(*user.ActiveBudgetPlanID, user.ID, queryParams.(utils.QueryParams))
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to get spending by bucket")
 		return

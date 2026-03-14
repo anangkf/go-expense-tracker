@@ -5,6 +5,7 @@ import (
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/utils"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -141,12 +142,24 @@ func (r *BudgetPlanRepository) DeleteBudgetPlan(budgetPlan *models.BudgetPlan) e
 	})
 }
 
-func (r *BudgetPlanRepository) GetTotalSpendingByBucket(budgetPlanID uint, userID uint) ([]TotalSpendingByBucket, error) {
+func (r *BudgetPlanRepository) GetTotalSpendingByBucket(budgetPlanID uint, userID uint, queryParams utils.QueryParams) ([]TotalSpendingByBucket, error) {
 	var result []TotalSpendingByBucket
+	expenseStartDate := queryParams.ExpenseStartDate
+	expenseEndDate := queryParams.ExpenseEndDate
+
+	if expenseStartDate == "" || expenseEndDate == "" {
+		// DEFAULT EXPENSE DATE RANGE
+		now := time.Now()
+		firstDayOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		lastDayOfMonth := firstDayOfMonth.AddDate(0, 1, -1)
+
+		expenseStartDate = firstDayOfMonth.Format("2006-01-02")
+		expenseEndDate = lastDayOfMonth.Format("2006-01-02")
+	}
 
 	err := r.db.Table("budget_buckets bb").
 		Select("bb.name as bucket_name, COALESCE(SUM(e.amount), 0) as total_spending").
-		Joins("LEFT JOIN expenses e ON e.bucket_type_id = bb.bucket_type_id AND e.user_id = ?", userID).
+		Joins("LEFT JOIN expenses e ON e.bucket_type_id = bb.bucket_type_id AND e.user_id = ? AND e.created_at BETWEEN ? AND ?", userID, expenseStartDate, expenseEndDate).
 		Where("bb.budget_plan_id = ?", budgetPlanID).
 		Group("bb.name").
 		Scan(&result).Error
