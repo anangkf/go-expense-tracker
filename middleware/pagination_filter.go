@@ -16,10 +16,10 @@ func PaginationAndFilter() gin.HandlerFunc {
 		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
 		// DEFAULT SORTING
-		sortBy := c.DefaultQuery("sortBy", "id")
-		order := strings.ToLower(c.DefaultQuery("order", "asc"))
+		sortBy := c.DefaultQuery("sortBy", "created_at")
+		order := strings.ToLower(c.DefaultQuery("order", "desc"))
 		if order != "asc" && order != "desc" {
-			order = "asc"
+			order = "desc"
 		}
 
 		// FILTERING

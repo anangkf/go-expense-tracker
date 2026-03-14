@@ -50,13 +50,8 @@ func (r *ExpenseRepository) GetByUserID(userID uint, queryParams utils.QueryPara
 	}
 
 	// APPLY SORTING
-	if queryParams.SortBy != "" {
-		order := "asc"
-		if strings.ToLower(queryParams.Order) == "desc" {
-			order = "desc"
-		}
-		query = query.Order(queryParams.SortBy + " " + order)
-	}
+	order := strings.ToLower(queryParams.Order)
+	query = query.Order(queryParams.SortBy + " " + order)
 
 	// APPLY PAGINATION
 	offset := (queryParams.Page - 1) * queryParams.Limit
