@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // EXPENSE SORT ALLOWLIST (query name -> SQL column)
@@ -107,7 +108,8 @@ func (r *ExpenseRepository) GetByID(id uint) (*models.Expense, error) {
 }
 
 func (r *ExpenseRepository) Update(expense *models.Expense) error {
-	return r.db.Save(expense).Error
+	// SAVE WRITES ALL COLUMNS (INCLUDING NULL bucket_type_id); OMIT ASSOCIATIONS SO THE PRELOADED OLD CATEGORY DOES NOT OVERRIDE category_id
+	return r.db.Omit(clause.Associations).Save(expense).Error
 }
 
 func (r *ExpenseRepository) Delete(expense *models.Expense) error {

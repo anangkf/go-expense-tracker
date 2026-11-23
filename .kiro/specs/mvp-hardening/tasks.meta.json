@@ -331,6 +331,61 @@
         "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
         "timestamp": 1795422700980
       }
+    ],
+    "6.1 `UpdateExpense`: set `BucketTypeID` sesuai category baru (NULL untuk income); pastikan repository menyimpan nilai NULL": [
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795422900792
+      },
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795422966333
+      }
+    ],
+    "6.2 `CategoryRepository.CountExpensesByCategoryID` dan pengecekan di `DeleteCategory` (409)": [
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795422970538
+      },
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423017437
+      }
+    ],
+    "6.3 Update anotasi swagger (`@Failure 409`)": [
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423020484
+      },
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423058551
+      }
+    ],
+    "6.4 Test (DB test): ganti category expense->expense, expense->income, dan hapus category terpakai/tidak terpakai": [
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423064384
+      },
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423240818
+      }
+    ],
+    "6. Expense dan category (R8, R9)": [
+      {
+        "executionId": "2695972c-dc50-46c4-ac5a-d415d260a8e8",
+        "chatSessionId": "sess_de38d44f-19e5-4f62-bae9-662839f67b5a",
+        "timestamp": 1795423240894
+      }
     ]
   }
 }

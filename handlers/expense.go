@@ -274,6 +274,15 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	expense.Amount = req.Amount
 	expense.CategoryID = category.ID
 
+	// SYNC BUCKET TYPE WITH NEW CATEGORY (NIL FOR INCOME)
+	if category.Type == "expense" {
+		expense.BucketTypeID = category.BucketTypeID
+	} else {
+		expense.BucketTypeID = nil
+	}
+	expense.BucketType = models.BucketType{}
+	expense.Category = *category
+
 	// SAVE UPDATED EXPENSE
 	if err := h.expenseRepo.Update(expense); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to update expense")

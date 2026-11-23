@@ -173,6 +173,13 @@ func (r *CategoryRepository) Update(category *models.Category) error {
 	return r.db.Save(category).Error
 }
 
+// COUNT NON-DELETED EXPENSES USING THE CATEGORY
+func (r *CategoryRepository) CountExpensesByCategoryID(categoryID uint) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Expense{}).Where("category_id = ?", categoryID).Count(&count).Error
+	return count, err
+}
+
 func (r *CategoryRepository) Delete(categoryID uint) error {
 	return r.db.Delete(&models.Category{}, categoryID).Error
 }

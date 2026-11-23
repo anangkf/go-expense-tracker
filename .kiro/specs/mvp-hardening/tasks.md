@@ -40,11 +40,11 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 5.4 Update anotasi swagger endpoint terkait
   - [x] 5.5 Test: validasi menolak ID 0 dan 5; update menyimpan `BucketTypeID` (DB test, skip tanpa DSN)
 
-- [ ] 6. Expense dan category (R8, R9)
-  - [ ] 6.1 `UpdateExpense`: set `BucketTypeID` sesuai category baru (NULL untuk income); pastikan repository menyimpan nilai NULL
-  - [ ] 6.2 `CategoryRepository.CountExpensesByCategoryID` dan pengecekan di `DeleteCategory` (409)
-  - [ ] 6.3 Update anotasi swagger (`@Failure 409`)
-  - [ ] 6.4 Test (DB test): ganti category expense->expense, expense->income, dan hapus category terpakai/tidak terpakai
+- [x] 6. Expense dan category (R8, R9)
+  - [x] 6.1 `UpdateExpense`: set `BucketTypeID` sesuai category baru (NULL untuk income); pastikan repository menyimpan nilai NULL
+  - [x] 6.2 `CategoryRepository.CountExpensesByCategoryID` dan pengecekan di `DeleteCategory` (409)
+  - [x] 6.3 Update anotasi swagger (`@Failure 409`)
+  - [x] 6.4 Test (DB test): ganti category expense->expense, expense->income, dan hapus category terpakai/tidak terpakai
 
 - [ ] 7. Penutup
   - [ ] 7.1 Jalankan `swag init` (docs jangan diedit manual)

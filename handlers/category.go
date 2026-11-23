@@ -358,6 +358,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Success 200 {object} utils.Response[models.DeleteCategoryResponse]
 // @Failure 401 {object} utils.Response[any]
 // @Failure 404 {object} utils.Response[any]
+// @Failure 409 {object} utils.Response[any]
 // @Failure 500 {object} utils.Response[any]
 // @Security BearerAuth
 // @Router /categories/{id} [delete]
@@ -386,6 +387,17 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	// CHECK IF CATEGORY BELONGS TO USER
 	if category.UserID == nil || *category.UserID != userID.(uint) {
 		utils.ErrorResponse(c, http.StatusForbidden, "You do not have permission to delete this category")
+		return
+	}
+
+	// CHECK IF CATEGORY IS STILL USED BY EXPENSES
+	expenseCount, err := h.categoryRepo.CountExpensesByCategoryID(uint(categoryID))
+	if err != nil {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to check category usage")
+		return
+	}
+	if expenseCount > 0 {
+		utils.ErrorResponse(c, http.StatusConflict, "Category cannot be deleted because it is still used by expenses")
 		return
 	}
 
