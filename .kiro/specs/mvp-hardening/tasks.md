@@ -15,7 +15,7 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 2.3 `database/connection.go`: level log GORM sesuai `SERVER_MODE`
   - [x] 2.4 Perbarui `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`, `CORS_ALLOWED_ORIGINS`)
   - [x] 2.5 Test `config/config_test.go` untuk `Validate()` (secret kosong gagal, terisi lolos)
-  - [ ] 2.6 Verifikasi manual: app gagal start tanpa `JWT_SECRET`, start normal dengan `.env` lengkap
+  - [x] 2.6 Verifikasi manual: app gagal start tanpa `JWT_SECRET`, start normal dengan `.env` lengkap
 
 - [ ] 3. Allowlist sort/filter (R1)
   - [ ] 3.1 Buat `utils/sanitize.go` (`SafeSort`, `SafeFilters`) dan `utils/sanitize_test.go` (termasuk payload injeksi)

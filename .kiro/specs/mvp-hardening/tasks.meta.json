@@ -114,6 +114,18 @@
         "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
         "timestamp": 1795416096274
       }
+    ],
+    "2.6 Verifikasi manual: app gagal start tanpa `JWT_SECRET`, start normal dengan `.env` lengkap": [
+      {
+        "executionId": "31459f65-95f7-445e-808d-8d937c120e1e",
+        "chatSessionId": "sess_b851b3fb-aa6f-4d36-9eca-f959ee22a342",
+        "timestamp": 1795416543429
+      },
+      {
+        "executionId": "31459f65-95f7-445e-808d-8d937c120e1e",
+        "chatSessionId": "sess_b851b3fb-aa6f-4d36-9eca-f959ee22a342",
+        "timestamp": 1795416598259
+      }
     ]
   }
 }
