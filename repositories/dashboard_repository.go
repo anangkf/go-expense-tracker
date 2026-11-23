@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"go-expense-tracker-api/models"
+	"go-expense-tracker-api/utils"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,51 +16,49 @@ func NewDashboardRepository(db *gorm.DB) *DashboardRepository {
 	return &DashboardRepository{db: db}
 }
 
+// SUM OF EXPENSES BY CATEGORY TYPE IN [from, toExclusive)
+func (r *DashboardRepository) sumByType(userID uint, categoryType string, from time.Time, toExclusive time.Time) (float64, error) {
+	var total float64
+	err := r.db.Model(&models.Expense{}).
+		Joins("JOIN categories ON categories.id = expenses.category_id AND categories.deleted_at IS NULL").
+		Where("expenses.user_id = ? AND expenses.deleted_at IS NULL AND expenses.created_at >= ? AND expenses.created_at < ? AND categories.type = ?",
+			userID, from, toExclusive, categoryType).
+		Select("COALESCE(SUM(expenses.amount), 0)").
+		Row().Scan(&total)
+	return total, err
+}
+
+// startDate AND endDate ARE DATES (INCLUSIVE), CONVERTED TO [start, end + 1 day)
 func (r *DashboardRepository) GetOverview(userID uint, startDate time.Time, endDate time.Time) (*models.Overview, error) {
 	var overview models.Overview
 
+	from := utils.StartOfDay(startDate)
+	to := utils.EndOfDayExclusive(endDate)
+
 	// TOTAL SPENT
-	err := r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND expenses.created_at BETWEEN ? AND ? AND categories.type = ?", userID, startDate, endDate, "expense").
-		Select("COALESCE(SUM(expenses.amount), 0)").
-		Row().Scan(&overview.TotalSpent)
+	totalSpent, err := r.sumByType(userID, "expense", from, to)
 	if err != nil {
 		return nil, err
 	}
+	overview.TotalSpent = totalSpent
 
-	// THIS WEEK SPENT
-	startOfWeek := time.Now().AddDate(0, 0, -int(time.Now().Weekday()))
-	endOfWeek := startOfWeek.AddDate(0, 0, 6)
-	err = r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND expenses.created_at BETWEEN ? AND ? AND categories.type = ?", userID, startOfWeek, endOfWeek, "expense").
-		Select("COALESCE(SUM(expenses.amount), 0)").
-		Row().Scan(&overview.ThisWeekSpent)
+	// THIS WEEK SPENT (WEEK STARTS ON SUNDAY)
+	now := time.Now()
+	startOfWeek := utils.StartOfDay(now.AddDate(0, 0, -int(now.Weekday())))
+	endOfWeekExclusive := startOfWeek.AddDate(0, 0, 7)
+	thisWeek, err := r.sumByType(userID, "expense", startOfWeek, endOfWeekExclusive)
 	if err != nil {
 		return nil, err
 	}
+	overview.ThisWeekSpent = thisWeek
 
-	// GET INCOME CATEGORY IDs
-	var categoryIDs []int
-
-	err = r.db.Model(models.Category{}).
-		Where("user_id = ? AND type = ?", userID, "income").
-		Pluck("id", &categoryIDs).Error
+	// TOTAL INCOME FROM ALL INCOME CATEGORIES (DEFAULT + USER'S), SCOPED BY expenses.user_id
+	totalIncome, err := r.sumByType(userID, "income", from, to)
 	if err != nil {
 		return nil, err
 	}
 
 	// CALCULATE LEFT IN BUDGET
-	var totalIncome float64
-	err = r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND expenses.created_at BETWEEN ? AND ? AND categories.type = ? AND categories.id IN ?", userID, startDate, endDate, "income", categoryIDs).
-		Select("COALESCE(SUM(expenses.amount), 0)").
-		Row().Scan(&totalIncome)
-	if err != nil {
-		return nil, err
-	}
 	overview.LeftInBudget = totalIncome - overview.TotalSpent
 
 	return &overview, nil
@@ -68,9 +67,13 @@ func (r *DashboardRepository) GetOverview(userID uint, startDate time.Time, endD
 func (r *DashboardRepository) GetDailyExpenses(userID uint, startDate time.Time, endDate time.Time) ([]models.DailyExpense, error) {
 	results := []models.DailyExpense{}
 
+	from := utils.StartOfDay(startDate)
+	to := utils.EndOfDayExclusive(endDate)
+
 	err := r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND expenses.created_at BETWEEN ? AND ? AND categories.type = ?", userID, startDate, endDate, "expense").
+		Joins("JOIN categories ON categories.id = expenses.category_id AND categories.deleted_at IS NULL").
+		Where("expenses.user_id = ? AND expenses.deleted_at IS NULL AND expenses.created_at >= ? AND expenses.created_at < ? AND categories.type = ?",
+			userID, from, to, "expense").
 		Select("DATE(expenses.created_at) AS date, COALESCE(SUM(expenses.amount), 0) AS total_amount").
 		Group("date").
 		Order("date ASC").

@@ -205,6 +205,85 @@
         "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
         "timestamp": 1795417696160
       }
+    ],
+    "4.1 Tambah helper tanggal di `utils` (`StartOfDay`, `EndOfDayExclusive`) beserta test": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795419999564
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420043717
+      }
+    ],
+    "4.2 `dashboard_repository.go`: income dari semua category income, `deleted_at`, rentang, `this_week_spent`; daily expenses ikut aturan sama": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420049449
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420099950
+      }
+    ],
+    "4.3 `budget_plan_repository.go` `GetTotalSpendingByBucket`: `e.deleted_at IS NULL` dan rentang": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420103847
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420144302
+      }
+    ],
+    "4.4 `expense_repository.go` `GetTotalIncomeAndExpenses`: `deleted_at` dan rentang": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420149120
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420207188
+      }
+    ],
+    "4.5 Audit pemanggil (handler dashboard, budget plan active) agar tidak double-add hari": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420211382
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420270417
+      }
+    ],
+    "4.6 Test repository (skip tanpa `TEST_DATABASE_DSN`): income dari category default terhitung, expense di hari terakhir terhitung, expense soft-deleted tidak terhitung": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420275681
+      },
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420360331
+      }
+    ],
+    "4. Perhitungan dashboard dan agregat (R6)": [
+      {
+        "executionId": "fb798664-5854-4e0f-8d05-915d34d4c658",
+        "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
+        "timestamp": 1795420360421
+      }
     ]
   }
 }

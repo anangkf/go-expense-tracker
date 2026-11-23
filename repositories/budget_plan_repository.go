@@ -180,9 +180,21 @@ func (r *BudgetPlanRepository) GetTotalSpendingByBucket(budgetPlanID uint, userI
 		expenseEndDate = lastDayOfMonth.Format("2006-01-02")
 	}
 
-	err := r.db.Table("budget_buckets bb").
+	// PARSE DATE RANGE
+	loc := time.Now().Location()
+	startDate, err := time.ParseInLocation("2006-01-02", expenseStartDate, loc)
+	if err != nil {
+		return nil, fmt.Errorf("invalid expense_start_date: %w", err)
+	}
+	endDate, err := time.ParseInLocation("2006-01-02", expenseEndDate, loc)
+	if err != nil {
+		return nil, fmt.Errorf("invalid expense_end_date: %w", err)
+	}
+
+	err = r.db.Table("budget_buckets bb").
 		Select("bb.name as bucket_name, COALESCE(SUM(e.amount), 0) as total_spending").
-		Joins("LEFT JOIN expenses e ON e.bucket_type_id = bb.bucket_type_id AND e.user_id = ? AND e.created_at BETWEEN ? AND ?", userID, expenseStartDate, expenseEndDate).
+		Joins("LEFT JOIN expenses e ON e.bucket_type_id = bb.bucket_type_id AND e.user_id = ? AND e.deleted_at IS NULL AND e.created_at >= ? AND e.created_at < ?",
+			userID, utils.StartOfDay(startDate), utils.EndOfDayExclusive(endDate)).
 		Where("bb.budget_plan_id = ?", budgetPlanID).
 		Group("bb.name").
 		Scan(&result).Error

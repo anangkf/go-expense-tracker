@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"database/sql"
+	"fmt"
 	"go-expense-tracker-api/models"
 	"go-expense-tracker-api/utils"
 	"strings"
@@ -127,25 +129,38 @@ func (r *ExpenseRepository) GetTotalIncomeAndExpenses(userID uint, queryParams u
 		expenseEndDate = lastDayOfMonth.Format("2006-01-02")
 	}
 
+	// PARSE DATE RANGE
+	loc := time.Now().Location()
+	startDate, err := time.ParseInLocation("2006-01-02", expenseStartDate, loc)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid expense_start_date: %w", err)
+	}
+	endDate, err := time.ParseInLocation("2006-01-02", expenseEndDate, loc)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid expense_end_date: %w", err)
+	}
+	from := utils.StartOfDay(startDate)
+	to := utils.EndOfDayExclusive(endDate)
+
 	// CALCULATE TOTAL INCOME
-	if err := r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "income", expenseStartDate, expenseEndDate).
-		Select("COALESCE(SUM(expenses.amount), 0)").
-		Row().
-		Scan(&totalIncome); err != nil {
+	if err := r.sumByCategoryType(userID, "income", from, to).Scan(&totalIncome); err != nil {
 		return 0, 0, err
 	}
 
 	// CALCULATE TOTAL EXPENSES
-	if err := r.db.Model(&models.Expense{}).
-		Joins("JOIN categories ON categories.id = expenses.category_id").
-		Where("expenses.user_id = ? AND categories.type = ? AND expenses.created_at BETWEEN ? AND ?", userID, "expense", expenseStartDate, expenseEndDate).
-		Select("COALESCE(SUM(expenses.amount), 0)").
-		Row().
-		Scan(&totalExpenses); err != nil {
+	if err := r.sumByCategoryType(userID, "expense", from, to).Scan(&totalExpenses); err != nil {
 		return 0, 0, err
 	}
 
 	return totalIncome, totalExpenses, nil
+}
+
+// SUM AMOUNT BY CATEGORY TYPE WITHIN [from, to), EXCLUDING SOFT-DELETED ROWS
+func (r *ExpenseRepository) sumByCategoryType(userID uint, categoryType string, from, to time.Time) *sql.Row {
+	return r.db.Model(&models.Expense{}).
+		Joins("JOIN categories ON categories.id = expenses.category_id AND categories.deleted_at IS NULL").
+		Where("expenses.user_id = ? AND expenses.deleted_at IS NULL AND categories.type = ? AND expenses.created_at >= ? AND expenses.created_at < ?",
+			userID, categoryType, from, to).
+		Select("COALESCE(SUM(expenses.amount), 0)").
+		Row()
 }

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -472,7 +473,10 @@ func (h *BudgetPlanHandler) SetActiveBudgetPlan(c *gin.Context) {
 // @Tags budget-plans
 // @Accept  json
 // @Produce  json
+// @Param expense_start_date query string false "Start date for spending calculation (YYYY-MM-DD), defaults to first day of current month"
+// @Param expense_end_date query string false "End date for spending calculation (YYYY-MM-DD, inclusive), defaults to last day of current month"
 // @Success 200 {object} utils.Response[models.ActiveBudgetPlanResponse]
+// @Failure 400 {object} utils.Response[any]
 // @Failure 401 {object} utils.Response[any]
 // @Failure 404 {object} utils.Response[any]
 // @Failure 500 {object} utils.Response[any]
@@ -487,6 +491,22 @@ func (h *BudgetPlanHandler) GetActiveBudgetPlan(c *gin.Context) {
 	}
 	// GET QUERY PARAMS
 	queryParams, _ := c.Get("queryParams")
+
+	// VALIDATE EXPENSE DATE RANGE (YYYY-MM-DD), EMPTY MEANS DEFAULT (CURRENT MONTH)
+	if qp, ok := queryParams.(utils.QueryParams); ok {
+		if qp.ExpenseStartDate != "" {
+			if _, err := time.Parse("2006-01-02", qp.ExpenseStartDate); err != nil {
+				utils.ErrorResponse(c, http.StatusBadRequest, "Invalid expense_start_date format. Please use YYYY-MM-DD.")
+				return
+			}
+		}
+		if qp.ExpenseEndDate != "" {
+			if _, err := time.Parse("2006-01-02", qp.ExpenseEndDate); err != nil {
+				utils.ErrorResponse(c, http.StatusBadRequest, "Invalid expense_end_date format. Please use YYYY-MM-DD.")
+				return
+			}
+		}
+	}
 
 	// GET USER
 	user, err := h.userRepo.GetByID(userID.(uint))

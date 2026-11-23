@@ -25,13 +25,13 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 3.5 Terapkan di `budget_plan_repository.go`
   - [x] 3.6 Verifikasi manual: `?sortBy=id;DROP TABLE users--` dan `?foo=bar` pada keempat endpoint list tidak error dan hasil tetap terpaginasi
 
-- [ ] 4. Perhitungan dashboard dan agregat (R6)
-  - [ ] 4.1 Tambah helper tanggal di `utils` (`StartOfDay`, `EndOfDayExclusive`) beserta test
-  - [ ] 4.2 `dashboard_repository.go`: income dari semua category income, `deleted_at`, rentang, `this_week_spent`; daily expenses ikut aturan sama
-  - [ ] 4.3 `budget_plan_repository.go` `GetTotalSpendingByBucket`: `e.deleted_at IS NULL` dan rentang
-  - [ ] 4.4 `expense_repository.go` `GetTotalIncomeAndExpenses`: `deleted_at` dan rentang
-  - [ ] 4.5 Audit pemanggil (handler dashboard, budget plan active) agar tidak double-add hari
-  - [ ] 4.6 Test repository (skip tanpa `TEST_DATABASE_DSN`): income dari category default terhitung, expense di hari terakhir terhitung, expense soft-deleted tidak terhitung
+- [x] 4. Perhitungan dashboard dan agregat (R6)
+  - [x] 4.1 Tambah helper tanggal di `utils` (`StartOfDay`, `EndOfDayExclusive`) beserta test
+  - [x] 4.2 `dashboard_repository.go`: income dari semua category income, `deleted_at`, rentang, `this_week_spent`; daily expenses ikut aturan sama
+  - [x] 4.3 `budget_plan_repository.go` `GetTotalSpendingByBucket`: `e.deleted_at IS NULL` dan rentang
+  - [x] 4.4 `expense_repository.go` `GetTotalIncomeAndExpenses`: `deleted_at` dan rentang
+  - [x] 4.5 Audit pemanggil (handler dashboard, budget plan active) agar tidak double-add hari
+  - [x] 4.6 Test repository (skip tanpa `TEST_DATABASE_DSN`): income dari category default terhitung, expense di hari terakhir terhitung, expense soft-deleted tidak terhitung
 
 - [ ] 5. Budget plan BucketTypeID (R7)
   - [ ] 5.1 Konstanta `ValidBucketTypeIDs` di `models` dan fungsi validasi
