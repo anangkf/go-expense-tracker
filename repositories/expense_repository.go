@@ -9,6 +9,28 @@ import (
 	"gorm.io/gorm"
 )
 
+// EXPENSE SORT ALLOWLIST (query name -> SQL column)
+var expenseSortColumns = map[string]string{
+	"id":             "expenses.id",
+	"name":           "expenses.name",
+	"amount":         "expenses.amount",
+	"category_id":    "expenses.category_id",
+	"bucket_type_id": "expenses.bucket_type_id",
+	"created_at":     "expenses.created_at",
+	"updated_at":     "expenses.updated_at",
+}
+
+// EXPENSE FILTER ALLOWLIST (query name -> SQL expression, cast to text for ILIKE)
+var expenseFilterColumns = map[string]string{
+	"id":             "expenses.id::text",
+	"name":           "expenses.name",
+	"amount":         "expenses.amount::text",
+	"category_id":    "expenses.category_id::text",
+	"bucket_type_id": "expenses.bucket_type_id::text",
+	"created_at":     "expenses.created_at::text",
+	"updated_at":     "expenses.updated_at::text",
+}
+
 type ExpenseRepository struct {
 	db *gorm.DB
 }
@@ -25,16 +47,15 @@ func (r *ExpenseRepository) GetByUserID(userID uint, queryParams utils.QueryPara
 	query = query.Joins("Category")
 
 	// APPLY FILTERS
-	for key, value := range queryParams.Filters {
+	if value := queryParams.Filters["category_name"]; value != "" {
+		query = query.Where(`"Category"."name" ILIKE ?`, "%"+value+"%")
+	}
+	if value := queryParams.Filters["category_type"]; value != "" {
+		query = query.Where(`"Category"."type" = ?`, value)
+	}
+	for column, value := range utils.SafeFilters(queryParams.Filters, expenseFilterColumns) {
 		if value != "" {
-			switch key {
-			case "category_name":
-				query = query.Where(`"Category"."name" ILIKE ?`, "%"+value+"%")
-			case "category_type":
-				query = query.Where(`"Category"."type" = ?`, value)
-			default:
-				query = query.Where("expenses."+key+" ILIKE ?", "%"+value+"%")
-			}
+			query = query.Where(column+" ILIKE ?", "%"+value+"%")
 		}
 	}
 
@@ -50,13 +71,16 @@ func (r *ExpenseRepository) GetByUserID(userID uint, queryParams utils.QueryPara
 	}
 
 	// APPLY SORTING
-	order := strings.ToLower(queryParams.Order)
-	query = query.Order(queryParams.SortBy + " " + order)
+	order := "desc"
+	if strings.ToLower(queryParams.Order) == "asc" {
+		order = "asc"
+	}
+	sortColumn := utils.SafeSort(queryParams.SortBy, expenseSortColumns, "expenses.created_at")
+	query = query.Order(sortColumn + " " + order)
 
 	// APPLY PAGINATION
 	offset := (queryParams.Page - 1) * queryParams.Limit
-	orderBy := "expenses." + queryParams.SortBy + " " + queryParams.Order
-	query = query.Offset(offset).Limit(queryParams.Limit).Order(orderBy)
+	query = query.Offset(offset).Limit(queryParams.Limit)
 
 	if err := query.Preload("Category").Find(&expenses).Error; err != nil {
 		return nil, 0, 0, err

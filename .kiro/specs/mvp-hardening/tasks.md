@@ -17,13 +17,13 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 2.5 Test `config/config_test.go` untuk `Validate()` (secret kosong gagal, terisi lolos)
   - [x] 2.6 Verifikasi manual: app gagal start tanpa `JWT_SECRET`, start normal dengan `.env` lengkap
 
-- [ ] 3. Allowlist sort/filter (R1)
-  - [ ] 3.1 Buat `utils/sanitize.go` (`SafeSort`, `SafeFilters`) dan `utils/sanitize_test.go` (termasuk payload injeksi)
-  - [ ] 3.2 Terapkan di `expense_repository.go` (list dan `Order`) dengan allowlist kolom expenses
-  - [ ] 3.3 Terapkan di `expense_template_repository.go`
-  - [ ] 3.4 Terapkan di `category_repository.go` (dua fungsi list: `GetByUserID`, `GetByUserIDWithTotal`)
-  - [ ] 3.5 Terapkan di `budget_plan_repository.go`
-  - [ ] 3.6 Verifikasi manual: `?sortBy=id;DROP TABLE users--` dan `?foo=bar` pada keempat endpoint list tidak error dan hasil tetap terpaginasi
+- [x] 3. Allowlist sort/filter (R1)
+  - [x] 3.1 Buat `utils/sanitize.go` (`SafeSort`, `SafeFilters`) dan `utils/sanitize_test.go` (termasuk payload injeksi)
+  - [x] 3.2 Terapkan di `expense_repository.go` (list dan `Order`) dengan allowlist kolom expenses
+  - [x] 3.3 Terapkan di `expense_template_repository.go`
+  - [x] 3.4 Terapkan di `category_repository.go` (dua fungsi list: `GetByUserID`, `GetByUserIDWithTotal`)
+  - [x] 3.5 Terapkan di `budget_plan_repository.go`
+  - [x] 3.6 Verifikasi manual: `?sortBy=id;DROP TABLE users--` dan `?foo=bar` pada keempat endpoint list tidak error dan hasil tetap terpaginasi
 
 - [ ] 4. Perhitungan dashboard dan agregat (R6)
   - [ ] 4.1 Tambah helper tanggal di `utils` (`StartOfDay`, `EndOfDayExclusive`) beserta test

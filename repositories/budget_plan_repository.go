@@ -10,6 +10,25 @@ import (
 	"gorm.io/gorm"
 )
 
+// BUDGET PLAN SORT ALLOWLIST (query name -> SQL column)
+var budgetPlanSortColumns = map[string]string{
+	"id":          "budget_plans.id",
+	"name":        "budget_plans.name",
+	"description": "budget_plans.description",
+	"is_template": "budget_plans.is_template",
+	"created_at":  "budget_plans.created_at",
+	"updated_at":  "budget_plans.updated_at",
+}
+
+// BUDGET PLAN FILTER ALLOWLIST (query name -> SQL expression, cast to text for ILIKE)
+var budgetPlanFilterColumns = map[string]string{
+	"id":          "budget_plans.id::text",
+	"name":        "budget_plans.name",
+	"description": "budget_plans.description",
+	"created_at":  "budget_plans.created_at::text",
+	"updated_at":  "budget_plans.updated_at::text",
+}
+
 type BudgetPlanRepository struct {
 	db *gorm.DB
 }
@@ -38,9 +57,15 @@ func (r *BudgetPlanRepository) GetBudgetPlansByUserID(userID uint, queryParams u
 	query := r.db.Model(&models.BudgetPlan{}).Where("user_id = ?", userID)
 
 	// APPLY FILTERS
-	for key, value := range queryParams.Filters {
+	if value := queryParams.Filters["start_date"]; value != "" {
+		query = query.Where("budget_plans.created_at >= ?", value)
+	}
+	if value := queryParams.Filters["end_date"]; value != "" {
+		query = query.Where("budget_plans.created_at <= ?", value)
+	}
+	for column, value := range utils.SafeFilters(queryParams.Filters, budgetPlanFilterColumns) {
 		if value != "" {
-			query = query.Where(key+" ILIKE ?", "%"+value+"%")
+			query = query.Where(column+" ILIKE ?", "%"+value+"%")
 		}
 	}
 
@@ -56,14 +81,12 @@ func (r *BudgetPlanRepository) GetBudgetPlansByUserID(userID uint, queryParams u
 	}
 
 	// APPLY SORTING
-	if queryParams.SortBy != "" {
-		order := "asc"
-		if strings.ToLower(queryParams.Order) == "desc" {
-			order = "desc"
-		}
-		orderBy := queryParams.SortBy + " " + order
-		query = query.Order(orderBy)
+	order := "desc"
+	if strings.ToLower(queryParams.Order) == "asc" {
+		order = "asc"
 	}
+	sortColumn := utils.SafeSort(queryParams.SortBy, budgetPlanSortColumns, "budget_plans.created_at")
+	query = query.Order(sortColumn + " " + order)
 
 	// APPLY PAGINATION
 	offset := (queryParams.Page - 1) * queryParams.Limit

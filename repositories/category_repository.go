@@ -9,6 +9,51 @@ import (
 	"gorm.io/gorm"
 )
 
+// CATEGORY SORT ALLOWLIST (query name -> SQL column)
+var categorySortColumns = map[string]string{
+	"id":         "categories.id",
+	"name":       "categories.name",
+	"type":       "categories.type",
+	"icon_name":  "categories.icon_name",
+	"is_default": "categories.is_default",
+	"created_at": "categories.created_at",
+	"updated_at": "categories.updated_at",
+}
+
+// CATEGORY FILTER ALLOWLIST (query name -> SQL expression, cast to text for ILIKE)
+var categoryFilterColumns = map[string]string{
+	"id":         "categories.id::text",
+	"name":       "categories.name",
+	"type":       "categories.type",
+	"icon_name":  "categories.icon_name",
+	"created_at": "categories.created_at::text",
+	"updated_at": "categories.updated_at::text",
+}
+
+func applyCategoryFilters(query *gorm.DB, queryParams utils.QueryParams) *gorm.DB {
+	if value := queryParams.Filters["start_date"]; value != "" {
+		query = query.Where("categories.created_at >= ?", value)
+	}
+	if value := queryParams.Filters["end_date"]; value != "" {
+		query = query.Where("categories.created_at <= ?", value)
+	}
+	for column, value := range utils.SafeFilters(queryParams.Filters, categoryFilterColumns) {
+		if value != "" {
+			query = query.Where(column+" ILIKE ?", "%"+value+"%")
+		}
+	}
+	return query
+}
+
+func applyCategorySort(query *gorm.DB, queryParams utils.QueryParams) *gorm.DB {
+	order := "desc"
+	if strings.ToLower(queryParams.Order) == "asc" {
+		order = "asc"
+	}
+	sortColumn := utils.SafeSort(queryParams.SortBy, categorySortColumns, "categories.created_at")
+	return query.Order(sortColumn + " " + order)
+}
+
 type CategoryRepository struct {
 	db *gorm.DB
 }
@@ -39,19 +84,7 @@ func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryPar
 	query := r.db.Model(&models.Category{}).Where("categories.user_id = ?", userID)
 
 	// APPLY FILTERS
-	for key, value := range queryParams.Filters {
-		if value != "" {
-			if key == "start_date" {
-				query = query.Where("categories.created_at >= ?", value)
-				continue
-			}
-			if key == "end_date" {
-				query = query.Where("categories.created_at <= ?", value)
-				continue
-			}
-			query = query.Where("categories."+key+" ILIKE ?", "%"+value+"%")
-		}
-	}
+	query = applyCategoryFilters(query, queryParams)
 
 	// COUNT TOTAL RECORDS
 	if err := query.Count(&total).Error; err != nil {
@@ -65,13 +98,7 @@ func (r *CategoryRepository) GetByUserID(userID uint, queryParams utils.QueryPar
 	}
 
 	// APPLY SORTING
-	if queryParams.SortBy != "" {
-		order := "asc"
-		if strings.ToLower(queryParams.Order) == "desc" {
-			order = "desc"
-		}
-		query = query.Order("categories." + queryParams.SortBy + " " + order)
-	}
+	query = applyCategorySort(query, queryParams)
 
 	// APPLY PAGINATION
 	offset := (queryParams.Page - 1) * queryParams.Limit
@@ -88,19 +115,7 @@ func (r *CategoryRepository) GetByUserIDWithTotal(userID uint, queryParams utils
 	query := r.db.Model(&models.Category{}).Where("categories.user_id = ?", userID)
 
 	// APPLY FILTERS
-	for key, value := range queryParams.Filters {
-		if value != "" {
-			if key == "start_date" {
-				query = query.Where("categories.created_at >= ?", value)
-				continue
-			}
-			if key == "end_date" {
-				query = query.Where("categories.created_at <= ?", value)
-				continue
-			}
-			query = query.Where("categories."+key+" ILIKE ?", "%"+value+"%")
-		}
-	}
+	query = applyCategoryFilters(query, queryParams)
 
 	// COUNT TOTAL RECORDS
 	if err := query.Count(&total).Error; err != nil {
@@ -114,13 +129,7 @@ func (r *CategoryRepository) GetByUserIDWithTotal(userID uint, queryParams utils
 	}
 
 	// APPLY SORTING
-	if queryParams.SortBy != "" {
-		order := "asc"
-		if strings.ToLower(queryParams.Order) == "desc" {
-			order = "desc"
-		}
-		query = query.Order("categories." + queryParams.SortBy + " " + order)
-	}
+	query = applyCategorySort(query, queryParams)
 
 	expenseStartDate := queryParams.ExpenseStartDate
 	expenseEndDate := queryParams.ExpenseEndDate

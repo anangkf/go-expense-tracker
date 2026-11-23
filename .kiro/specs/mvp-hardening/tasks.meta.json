@@ -126,6 +126,85 @@
         "chatSessionId": "sess_b851b3fb-aa6f-4d36-9eca-f959ee22a342",
         "timestamp": 1795416598259
       }
+    ],
+    "3.1 Buat `utils/sanitize.go` (`SafeSort`, `SafeFilters`) dan `utils/sanitize_test.go` (termasuk payload injeksi)": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416666433
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416738527
+      }
+    ],
+    "3.2 Terapkan di `expense_repository.go` (list dan `Order`) dengan allowlist kolom expenses": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416743574
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416876626
+      }
+    ],
+    "3.3 Terapkan di `expense_template_repository.go`": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416880863
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416924759
+      }
+    ],
+    "3.4 Terapkan di `category_repository.go` (dua fungsi list: `GetByUserID`, `GetByUserIDWithTotal`)": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416928108
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795416999676
+      }
+    ],
+    "3.5 Terapkan di `budget_plan_repository.go`": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795417004048
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795417046254
+      }
+    ],
+    "3.6 Verifikasi manual: `?sortBy=id;DROP TABLE users--` dan `?foo=bar` pada keempat endpoint list tidak error dan hasil tetap terpaginasi": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795417051561
+      },
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795417696077
+      }
+    ],
+    "3. Allowlist sort/filter (R1)": [
+      {
+        "executionId": "3ace8b97-c169-404b-907d-b1ef6bfea6ff",
+        "chatSessionId": "sess_d3f08fb2-2160-4128-bc3b-38b08581e804",
+        "timestamp": 1795417696160
+      }
     ]
   }
 }
