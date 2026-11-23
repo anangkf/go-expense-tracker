@@ -1,0 +1,72 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Tambah `c.Abort()` di `middleware/auth.go` pada cabang user tidak ditemukan": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414885322
+      },
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414926243
+      }
+    ],
+    "1.2 `services/jwt_services.go`: kembalikan `err` dari `SignedString`; pakai `jwt.WithValidMethods([]string{\"HS256\"})` pada kedua parser": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414885399
+      },
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414926307
+      }
+    ],
+    "1.3 `handlers/auth.go`: tangani error Generate di Register/Login/Refresh dengan 500; hapus log `RefreshExpireHours`": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414936376
+      },
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414967664
+      }
+    ],
+    "1.4 Test `services/jwt_services_test.go`: token valid lolos, token `alg=none` dan HS512 ditolak, secret salah ditolak": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795414971049
+      },
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795415012933
+      }
+    ],
+    "1.5 Test `middleware/auth_test.go` (httptest): user tidak ada -> 401 dan handler berikutnya tidak dipanggil": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795415018065
+      },
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795415087879
+      }
+    ],
+    "1. Auth dan token (R2, R3)": [
+      {
+        "executionId": "10db3b08-ac66-4d0e-8ee0-71c9d80e7a22",
+        "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
+        "timestamp": 1795415087992
+      }
+    ]
+  }
+}

@@ -5,7 +5,6 @@ import (
 	"go-expense-tracker-api/repositories"
 	"go-expense-tracker-api/services"
 	"go-expense-tracker-api/utils"
-	"log"
 	"net/http"
 	"time"
 
@@ -183,7 +182,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to generate refresh token")
 		return
 	}
-	log.Println(h.jwtService.Config.JWT.RefreshExpireHours)
+
 	// SAVE REFRESH TOKEN TO DATABASE
 	rt := &models.RefreshToken{
 		UserID:    user.ID,

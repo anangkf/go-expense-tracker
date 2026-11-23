@@ -41,6 +41,7 @@ func AuthMiddleware(jwtService *services.JWTService, userRepo *repositories.User
 		// VALIDATE USER ID
 		if _, err := userRepo.GetByID(claims.UserID); err != nil {
 			utils.ErrorResponse(c, http.StatusUnauthorized, "Invalid user ID")
+			c.Abort()
 			return
 		}
 

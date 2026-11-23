@@ -42,7 +42,7 @@ func (j *JWTService) GenerateToken(userID uint, email string, jti string) (strin
 	tokenString, err := token.SignedString([]byte(j.Config.JWT.Secret))
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return tokenString, nil
@@ -66,7 +66,7 @@ func (j *JWTService) GenerateRefreshToken(userID uint, email string, jti string)
 	tokenString, err := token.SignedString([]byte(j.Config.JWT.RefreshSecret))
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return tokenString, nil
@@ -78,7 +78,7 @@ func (j *JWTService) ValidateToken(tokenString string) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(j.Config.JWT.Secret), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (j *JWTService) ValidateRefreshToken(tokenString string) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(j.Config.JWT.RefreshSecret), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 
 	if err != nil {
 		return nil, err
