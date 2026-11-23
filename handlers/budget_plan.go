@@ -100,7 +100,7 @@ func (h *BudgetPlanHandler) GetBudgetPlans(c *gin.Context) {
 
 // CreateBudgetPlan godoc
 // @Summary Create a new budget plan
-// @Description Create a new budget plan for the authenticated user. Can be created from a template or from scratch.
+// @Description Create a new budget plan for the authenticated user. Can be created from a template or from scratch. Each bucket's bucket_type_id must be between 1 and 4 (1 Needs, 2 Wants, 3 Savings, 4 Investments) and total percentage must be 100, otherwise 400 is returned.
 // @Tags budget-plans
 // @Accept json
 // @Produce json
@@ -136,6 +136,14 @@ func (h *BudgetPlanHandler) CreateBudgetPlan(c *gin.Context) {
 	if err := h.validator.Struct(req); err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	// VALIDATE BUCKET TYPE IDS
+	for _, bucket := range req.Buckets {
+		if !models.IsValidBucketTypeID(bucket.BucketTypeID) {
+			utils.ErrorResponse(c, http.StatusBadRequest, "Invalid bucket_type_id: "+strconv.Itoa(int(bucket.BucketTypeID))+". Must be between 1 and 4")
+			return
+		}
 	}
 
 	var totalPercentage float64
@@ -231,7 +239,7 @@ func (h *BudgetPlanHandler) GetBudgetPlan(c *gin.Context) {
 
 // UpdateBudgetPlan godoc
 // @Summary Update a budget plan
-// @Description Update an existing budget plan for the authenticated user
+// @Description Update an existing budget plan for the authenticated user. Each bucket's bucket_type_id must be between 1 and 4 (1 Needs, 2 Wants, 3 Savings, 4 Investments) and is persisted for created and updated buckets. Total percentage must be 100, otherwise 400 is returned.
 // @Tags budget-plans
 // @Accept json
 // @Produce json
@@ -298,6 +306,12 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 		processedBucketIDs := make(map[uint]struct{})
 
 		for _, bucketReq := range req.Buckets {
+			// VALIDATE BUCKET TYPE ID
+			if !models.IsValidBucketTypeID(bucketReq.BucketTypeID) {
+				utils.ErrorResponse(c, http.StatusBadRequest, "Invalid bucket_type_id: "+strconv.Itoa(int(bucketReq.BucketTypeID))+". Must be between 1 and 4")
+				return
+			}
+
 			totalPercentage += bucketReq.Percentage
 
 			// Process update bucket
@@ -309,6 +323,7 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 				bucketsToUpdate = append(bucketsToUpdate, models.BudgetBucket{
 					ID:           *bucketReq.ID,
 					BudgetPlanID: budgetPlan.ID,
+					BucketTypeID: bucketReq.BucketTypeID,
 					Name:         bucketReq.Name,
 					Percentage:   bucketReq.Percentage,
 				})
@@ -317,6 +332,7 @@ func (h *BudgetPlanHandler) UpdateBudgetPlan(c *gin.Context) {
 			} else {
 				bucketsToCreate = append(bucketsToCreate, models.BudgetBucket{
 					BudgetPlanID: budgetPlan.ID,
+					BucketTypeID: bucketReq.BucketTypeID,
 					Name:         bucketReq.Name,
 					Percentage:   bucketReq.Percentage,
 				})

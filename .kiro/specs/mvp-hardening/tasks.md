@@ -33,12 +33,12 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 4.5 Audit pemanggil (handler dashboard, budget plan active) agar tidak double-add hari
   - [x] 4.6 Test repository (skip tanpa `TEST_DATABASE_DSN`): income dari category default terhitung, expense di hari terakhir terhitung, expense soft-deleted tidak terhitung
 
-- [ ] 5. Budget plan BucketTypeID (R7)
-  - [ ] 5.1 Konstanta `ValidBucketTypeIDs` di `models` dan fungsi validasi
-  - [ ] 5.2 Terapkan validasi di create dan update budget plan (400 bila tidak valid)
-  - [ ] 5.3 Simpan `BucketTypeID` pada bucket yang dibuat/diupdate di transaksi update
-  - [ ] 5.4 Update anotasi swagger endpoint terkait
-  - [ ] 5.5 Test: validasi menolak ID 0 dan 5; update menyimpan `BucketTypeID` (DB test, skip tanpa DSN)
+- [x] 5. Budget plan BucketTypeID (R7)
+  - [x] 5.1 Konstanta `ValidBucketTypeIDs` di `models` dan fungsi validasi
+  - [x] 5.2 Terapkan validasi di create dan update budget plan (400 bila tidak valid)
+  - [x] 5.3 Simpan `BucketTypeID` pada bucket yang dibuat/diupdate di transaksi update
+  - [x] 5.4 Update anotasi swagger endpoint terkait
+  - [x] 5.5 Test: validasi menolak ID 0 dan 5; update menyimpan `BucketTypeID` (DB test, skip tanpa DSN)
 
 - [ ] 6. Expense dan category (R8, R9)
   - [ ] 6.1 `UpdateExpense`: set `BucketTypeID` sesuai category baru (NULL untuk income); pastikan repository menyimpan nilai NULL

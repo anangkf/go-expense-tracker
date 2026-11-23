@@ -284,6 +284,53 @@
         "chatSessionId": "sess_9e3de465-308f-4c57-8f6e-d9dd9250142f",
         "timestamp": 1795420360421
       }
+    ],
+    "5. Budget plan BucketTypeID (R7)": [
+      {
+        "executionId": "d1ffbed2-7035-4ea5-a2a7-d84518250fa7",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795420613693
+      },
+      {
+        "executionId": "d1ffbed2-7035-4ea5-a2a7-d84518250fa7",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795420701834
+      }
+    ],
+    "5.1 Konstanta `ValidBucketTypeIDs` di `models` dan fungsi validasi": [
+      {
+        "executionId": "d092f5df-4bbe-4cc4-9fb1-494134159991",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795422700229
+      }
+    ],
+    "5.2 Terapkan validasi di create dan update budget plan (400 bila tidak valid)": [
+      {
+        "executionId": "d092f5df-4bbe-4cc4-9fb1-494134159991",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795422700328
+      }
+    ],
+    "5.3 Simpan `BucketTypeID` pada bucket yang dibuat/diupdate di transaksi update": [
+      {
+        "executionId": "d092f5df-4bbe-4cc4-9fb1-494134159991",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795422700382
+      }
+    ],
+    "5.4 Update anotasi swagger endpoint terkait": [
+      {
+        "executionId": "d092f5df-4bbe-4cc4-9fb1-494134159991",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795422700444
+      }
+    ],
+    "5.5 Test: validasi menolak ID 0 dan 5; update menyimpan `BucketTypeID` (DB test, skip tanpa DSN)": [
+      {
+        "executionId": "d092f5df-4bbe-4cc4-9fb1-494134159991",
+        "chatSessionId": "sess_73d8c0d3-5c6c-46ee-aa69-6281efe905f1",
+        "timestamp": 1795422700980
+      }
     ]
   }
 }

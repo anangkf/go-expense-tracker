@@ -132,7 +132,8 @@ func (r *BudgetPlanRepository) UpdateBudgetPlanAndSyncBuckets(budgetPlan *models
 		// UPDATE EXISTING BUDGET BUCKETS
 		if len(toUpdate) > 0 {
 			for _, bucket := range toUpdate {
-				if err := tx.Save(&bucket).Error; err != nil {
+				if err := tx.Model(&models.BudgetBucket{}).Where("id = ? AND budget_plan_id = ?", bucket.ID, bucket.BudgetPlanID).
+					Select("Name", "Percentage", "BucketTypeID").Updates(&bucket).Error; err != nil {
 					return err
 				}
 			}
