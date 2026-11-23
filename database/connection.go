@@ -25,8 +25,14 @@ func InitDatabase(cfg *config.Config) {
 		cfg.Database.SSLMode,
 	)
 
+	// SET GORM LOG LEVEL BY SERVER MODE
+	logLevel := logger.Warn
+	if cfg.Server.Mode == "debug" {
+		logLevel = logger.Info
+	}
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logLevel),
 	})
 
 	if err != nil {

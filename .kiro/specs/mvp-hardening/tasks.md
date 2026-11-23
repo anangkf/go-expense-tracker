@@ -9,12 +9,12 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 1.4 Test `services/jwt_services_test.go`: token valid lolos, token `alg=none` dan HS512 ditolak, secret salah ditolak
   - [x] 1.5 Test `middleware/auth_test.go` (httptest): user tidak ada -> 401 dan handler berikutnya tidak dipanggil
 
-- [ ] 2. Konfigurasi, CORS, log (R4, R5)
-  - [ ] 2.1 `config/config.go`: hapus fallback secret, tambah `CORSAllowedOrigins`, tambah `Validate()`
-  - [ ] 2.2 `main.go`: panggil `Validate()` dengan `log.Fatal`; pakai origin dari config; fallback `http://localhost:3000` di debug, gagal di release bila kosong
-  - [ ] 2.3 `database/connection.go`: level log GORM sesuai `SERVER_MODE`
-  - [ ] 2.4 Perbarui `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`, `CORS_ALLOWED_ORIGINS`)
-  - [ ] 2.5 Test `config/config_test.go` untuk `Validate()` (secret kosong gagal, terisi lolos)
+- [x] 2. Konfigurasi, CORS, log (R4, R5)
+  - [x] 2.1 `config/config.go`: hapus fallback secret, tambah `CORSAllowedOrigins`, tambah `Validate()`
+  - [x] 2.2 `main.go`: panggil `Validate()` dengan `log.Fatal`; pakai origin dari config; fallback `http://localhost:3000` di debug, gagal di release bila kosong
+  - [x] 2.3 `database/connection.go`: level log GORM sesuai `SERVER_MODE`
+  - [x] 2.4 Perbarui `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`, `CORS_ALLOWED_ORIGINS`)
+  - [x] 2.5 Test `config/config_test.go` untuk `Validate()` (secret kosong gagal, terisi lolos)
   - [ ] 2.6 Verifikasi manual: app gagal start tanpa `JWT_SECRET`, start normal dengan `.env` lengkap
 
 - [ ] 3. Allowlist sort/filter (R1)

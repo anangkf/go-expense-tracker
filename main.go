@@ -41,6 +41,20 @@ func main() {
 	// LOAD CONFIG
 	cfg := config.LoadConfig()
 
+	// VALIDATE CONFIG
+	if err := cfg.Validate(); err != nil {
+		log.Fatal("Invalid configuration: ", err)
+	}
+
+	// RESOLVE CORS ORIGINS
+	if len(cfg.Server.CORSAllowedOrigins) == 0 {
+		if cfg.Server.Mode == "release" {
+			log.Fatal("CORS_ALLOWED_ORIGINS is required in release mode")
+		}
+		cfg.Server.CORSAllowedOrigins = []string{"http://localhost:3000"}
+		log.Println("CORS_ALLOWED_ORIGINS not set, using http://localhost:3000")
+	}
+
 	// DB INIT
 	database.InitDatabase(cfg)
 
@@ -62,8 +76,7 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	// SETUP CORS MIDDLEWARE
 	router.Use(cors.New(cors.Config{
-		// AllowOrigins: []string{"http://localhost:3000", "https://your-production-domain.com"},
-		AllowOrigins:     []string{"*"}, // for development only
+		AllowOrigins:     cfg.Server.CORSAllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

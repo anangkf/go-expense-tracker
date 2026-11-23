@@ -1,9 +1,11 @@
 package config
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -31,8 +33,9 @@ type JWTConfig struct {
 }
 
 type ServerConfig struct {
-	Port string
-	Mode string
+	Port               string
+	Mode               string
+	CORSAllowedOrigins []string
 }
 
 func LoadConfig() *Config {
@@ -54,14 +57,15 @@ func LoadConfig() *Config {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:             getEnv("JWT_SECRET", "your-secret-key"),
+			Secret:             getEnv("JWT_SECRET", ""),
 			ExpireHours:        expireHours,
-			RefreshSecret:      getEnv("JWT_REFRESH_SECRET", "your-refresh-secret-key"),
+			RefreshSecret:      getEnv("JWT_REFRESH_SECRET", ""),
 			RefreshExpireHours: refreshExpireHours,
 		},
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", "8080"),
-			Mode: getEnv("SERVER_MODE", "debug"),
+			Port:               getEnv("SERVER_PORT", "8080"),
+			Mode:               getEnv("SERVER_MODE", "debug"),
+			CORSAllowedOrigins: splitCSV(getEnv("CORS_ALLOWED_ORIGINS", "")),
 		},
 	}
 }
@@ -72,4 +76,27 @@ func getEnv(key, defaultValue string) string {
 	}
 
 	return defaultValue
+}
+
+// VALIDATE REQUIRED CONFIG
+func (c *Config) Validate() error {
+	if c.JWT.Secret == "" {
+		return errors.New("JWT_SECRET is required")
+	}
+	if c.JWT.RefreshSecret == "" {
+		return errors.New("JWT_REFRESH_SECRET is required")
+	}
+
+	return nil
+}
+
+func splitCSV(value string) []string {
+	origins := []string{}
+	for _, part := range strings.Split(value, ",") {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			origins = append(origins, trimmed)
+		}
+	}
+
+	return origins
 }

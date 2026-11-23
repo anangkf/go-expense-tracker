@@ -67,6 +67,53 @@
         "chatSessionId": "sess_65580e62-9e11-4b55-a798-c1ee2f04c809",
         "timestamp": 1795415087992
       }
+    ],
+    "2. Konfigurasi, CORS, log (R4, R5)": [
+      {
+        "executionId": "97241bb8-222a-41d9-a042-b805c5aaa242",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795415855947
+      },
+      {
+        "executionId": "97241bb8-222a-41d9-a042-b805c5aaa242",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795415939095
+      }
+    ],
+    "2.1 `config/config.go`: hapus fallback secret, tambah `CORSAllowedOrigins`, tambah `Validate()`": [
+      {
+        "executionId": "02919011-344f-4d30-8c54-dac0448d7b8b",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795416093361
+      }
+    ],
+    "2.2 `main.go`: panggil `Validate()` dengan `log.Fatal`; pakai origin dari config; fallback `http://localhost:3000` di debug, gagal di release bila kosong": [
+      {
+        "executionId": "02919011-344f-4d30-8c54-dac0448d7b8b",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795416094374
+      }
+    ],
+    "2.3 `database/connection.go`: level log GORM sesuai `SERVER_MODE`": [
+      {
+        "executionId": "02919011-344f-4d30-8c54-dac0448d7b8b",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795416094872
+      }
+    ],
+    "2.4 Perbarui `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`, `CORS_ALLOWED_ORIGINS`)": [
+      {
+        "executionId": "02919011-344f-4d30-8c54-dac0448d7b8b",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795416095948
+      }
+    ],
+    "2.5 Test `config/config_test.go` untuk `Validate()` (secret kosong gagal, terisi lolos)": [
+      {
+        "executionId": "02919011-344f-4d30-8c54-dac0448d7b8b",
+        "chatSessionId": "sess_ccef7e3d-e556-4736-8232-1771d98c5523",
+        "timestamp": 1795416096274
+      }
     ]
   }
 }
