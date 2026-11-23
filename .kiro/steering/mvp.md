@@ -17,17 +17,20 @@ Status berdasarkan scan kode (bukan hasil menjalankan aplikasi). Tujuan MVP: use
 ## Belum ada / kurang untuk rilis MVP
 
 Wajib sebelum dipakai user nyata:
-- [ ] Perbaiki SQL injection pada `sortBy` dan filter key (allowlist kolom)
-- [ ] Tambah `c.Abort()` di `AuthMiddleware` saat user tidak ditemukan
-- [ ] Perbaiki `GenerateToken`/`GenerateRefreshToken` agar mengembalikan error
-- [ ] Lengkapi `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`) dan hapus fallback secret hardcoded (gagal start jika kosong)
-- [ ] Batasi CORS ke origin frontend, turunkan log level GORM di produksi
-- [ ] Perbaiki perhitungan dashboard (income dari category default, batas akhir hari, filter `deleted_at`)
-- [ ] Validasi `BucketTypeID` pada budget plan, dan simpan saat update bucket
-- [ ] Update `BucketTypeID` expense saat category berubah
-- [ ] Cegah hapus category yang masih dipakai expense (atau tentukan perilakunya)
+
+- [x] Perbaiki SQL injection pada `sortBy` dan filter key (allowlist kolom via `utils.SafeSort`/`SafeFilters`)
+- [x] Tambah `c.Abort()` di `AuthMiddleware` saat user tidak ditemukan
+- [x] Perbaiki `GenerateToken`/`GenerateRefreshToken` agar mengembalikan error (parser juga hanya menerima HS256)
+- [x] Lengkapi `.env.example` (`JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRE_HOURS`, `CORS_ALLOWED_ORIGINS`) dan hapus fallback secret hardcoded (gagal start jika kosong)
+- [x] Batasi CORS ke origin frontend (`CORS_ALLOWED_ORIGINS`), turunkan log level GORM di produksi
+- [x] Perbaiki perhitungan dashboard (income dari category default, batas akhir hari, filter `deleted_at`)
+- [x] Validasi `BucketTypeID` pada budget plan, dan simpan saat update bucket
+- [x] Update `BucketTypeID` expense saat category berubah
+- [x] Cegah hapus category yang masih dipakai expense (response 409)
+- [ ] Perbaiki seed: default category Savings (ID 7) memakai `bucket_type_id` 1 (Needs), seharusnya 3 (Savings)
 
 Sebaiknya ada:
+
 - [ ] Test (minimal handler auth, expense, budget plan active, dan repository dashboard)
 - [ ] Dockerfile + docker-compose (app + Postgres)
 - [ ] Migrasi SQL versioned menggantikan `AutoMigrate` untuk produksi

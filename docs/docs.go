@@ -283,7 +283,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new budget plan for the authenticated user. Can be created from a template or from scratch.",
+                "description": "Create a new budget plan for the authenticated user. Can be created from a template or from scratch. Each bucket's bucket_type_id must be between 1 and 4 (1 Needs, 2 Wants, 3 Savings, 4 Investments) and total percentage must be 100, otherwise 400 is returned.",
                 "consumes": [
                     "application/json"
                 ],
@@ -345,11 +345,31 @@ const docTemplate = `{
                     "budget-plans"
                 ],
                 "summary": "Get active budget plan",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date for spending calculation (YYYY-MM-DD), defaults to first day of current month",
+                        "name": "expense_start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date for spending calculation (YYYY-MM-DD, inclusive), defaults to last day of current month",
+                        "name": "expense_end_date",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/utils.Response-models_ActiveBudgetPlanResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
                         }
                     },
                     "401": {
@@ -479,7 +499,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Update an existing budget plan for the authenticated user",
+                "description": "Update an existing budget plan for the authenticated user. Each bucket's bucket_type_id must be between 1 and 4 (1 Needs, 2 Wants, 3 Savings, 4 Investments) and is persisted for created and updated buckets. Total percentage must be 100, otherwise 400 is returned.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1078,6 +1098,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/utils.Response-any"
                         }

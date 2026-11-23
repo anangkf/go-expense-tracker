@@ -46,8 +46,8 @@ Urutan dibuat dari yang paling kritis dan independen. Setiap task diakhiri `go b
   - [x] 6.3 Update anotasi swagger (`@Failure 409`)
   - [x] 6.4 Test (DB test): ganti category expense->expense, expense->income, dan hapus category terpakai/tidak terpakai
 
-- [ ] 7. Penutup
-  - [ ] 7.1 Jalankan `swag init` (docs jangan diedit manual)
-  - [ ] 7.2 Jalankan `go build ./... && go vet ./... && go test ./...`
-  - [ ] 7.3 Uji alur end-to-end manual: register -> pilih template -> set active -> catat income dan expense -> cek `/budget-plans/active` dan `/dashboard`
-  - [ ] 7.4 Centang item "Wajib" di `mvp.md` dan perbarui bagian "Hal yang perlu diwaspadai" di steering `structure.md`/`tech.md` yang sudah tertangani
+- [x] 7. Penutup
+  - [x] 7.1 Jalankan `swag init` (docs jangan diedit manual)
+  - [x] 7.2 Jalankan `go build ./... && go vet ./... && go test ./...`
+  - [x] 7.3 Uji alur end-to-end manual: register -> pilih template -> set active -> catat income dan expense -> cek `/budget-plans/active` dan `/dashboard`
+  - [x] 7.4 Centang item "Wajib" di `mvp.md` dan perbarui bagian "Hal yang perlu diwaspadai" di steering `structure.md`/`tech.md` yang sudah tertangani
