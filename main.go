@@ -58,6 +58,9 @@ func main() {
 	// DB INIT
 	database.InitDatabase(cfg)
 
+	// PERIODICALLY DELETE STALE UNVERIFIED ACCOUNTS
+	startUnverifiedUserCleanup(cfg, repositories.NewEmailVerificationRepository(database.DB))
+
 	// SETUP GIN MODE
 	gin.SetMode(cfg.Server.Mode)
 
@@ -86,18 +89,20 @@ func setupRouter(cfg *config.Config) *gin.Engine {
 
 	// INIT SERVICES
 	jwtServices := services.NewJWTService(cfg)
+	emailService := services.NewEmailService(cfg)
 
 	// INIT REPOSITORIES
 	userRepo := repositories.NewUserRepository(database.DB)
 	categoryRepo := repositories.NewCategoryRepository(database.DB)
 	expenseRepo := repositories.NewExpenseRepository(database.DB)
 	refreshTokenRepo := repositories.NewRefreshTokenRepository(database.DB)
+	emailVerifRepo := repositories.NewEmailVerificationRepository(database.DB)
 	budgetPlanRepo := repositories.NewBudgetPlanRepository(database.DB)
 	expenseTemplateRepo := repositories.NewExpenseTemplateRepository(database.DB)
 	dashboardRepo := repositories.NewDashboardRepository(database.DB)
 
 	// INIT HANDLERS
-	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, jwtServices)
+	authHandler := handlers.NewAuthHandler(userRepo, categoryRepo, refreshTokenRepo, emailVerifRepo, jwtServices, emailService, cfg)
 	userHandler := handlers.NewUserHandler(userRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, userRepo)
 	expenseHandler := handlers.NewExpenseHandler(expenseRepo, userRepo, categoryRepo)
@@ -128,6 +133,8 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 	{
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
+		auth.POST("/verify-email", authHandler.VerifyEmail)
+		auth.POST("/resend-verification", authHandler.ResendVerification)
 		auth.POST("/refresh-token", authHandler.RefreshToken)
 		auth.POST("/logout", middleware.AuthMiddleware(jwtService, userRepo), authHandler.Logout)
 	}
@@ -184,4 +191,27 @@ func setupRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, userHand
 	// DASHBOARD ROUTES
 	dashboard := protected.Group("/dashboard")
 	dashboard.GET("", dashbboardHandler.GetDashboard)
+}
+
+// DELETE UNVERIFIED ACCOUNTS OLDER THAN UNVERIFIED_USER_TTL_HOURS, ON START AND THEN HOURLY
+func startUnverifiedUserCleanup(cfg *config.Config, repo *repositories.EmailVerificationRepository) {
+	ttl := time.Duration(cfg.Email.UnverifiedUserTTLHours) * time.Hour
+	run := func() {
+		n, err := repo.DeleteStaleUnverifiedUsers(time.Now().Add(-ttl))
+		if err != nil {
+			log.Println("Unverified user cleanup failed:", err)
+			return
+		}
+		if n > 0 {
+			log.Printf("Unverified user cleanup removed %d account(s)", n)
+		}
+	}
+	go func() {
+		run()
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			run()
+		}
+	}()
 }

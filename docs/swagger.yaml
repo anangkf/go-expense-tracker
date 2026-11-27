@@ -408,12 +408,15 @@ definitions:
     type: object
   models.RegisterResponse:
     properties:
-      refresh_token:
-        type: string
-      token:
-        type: string
       user:
         $ref: '#/definitions/models.UserResponse'
+    type: object
+  models.ResendVerificationRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   models.User:
     properties:
@@ -431,6 +434,8 @@ definitions:
       created_at:
         type: string
       email:
+        type: string
+      email_verified_at:
         type: string
       id:
         type: integer
@@ -459,6 +464,16 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  models.VerifyEmailRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
     type: object
   utils.PaginationResponse-array_models_BudgetPlan:
     properties:
@@ -792,6 +807,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/utils.Response-any'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response-any'
         "500":
           description: Internal Server Error
           schema:
@@ -858,7 +881,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user account
+      description: Create a new unverified user account and email a 6 digit verification
+        code. Tokens are issued by login after verification.
       parameters:
       - description: User registration data
         in: body
@@ -886,6 +910,77 @@ paths:
           schema:
             $ref: '#/definitions/utils.Response-any'
       summary: Register users
+      tags:
+      - auth
+  /auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Send a new verification code to an unverified account. Limited
+        by a cooldown and a daily maximum. Unknown or already verified emails get
+        the same generic success response.
+      parameters:
+      - description: Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      summary: Resend verification OTP
+      tags:
+      - auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify the 6 digit code sent by email. The code expires and is
+        invalidated after too many wrong attempts.
+      parameters:
+      - description: Email and OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response-any'
+      summary: Verify email with OTP
       tags:
       - auth
   /budget-plans:

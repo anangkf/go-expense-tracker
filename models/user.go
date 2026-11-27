@@ -12,6 +12,7 @@ type User struct {
 	Name               string         `json:"name" gorm:"not null" validate:"required,min=2,max=100"`
 	Password           string         `json:"-" gorm:"not null" validate:"required,min=6"`
 	ActiveBudgetPlanID *uint          `json:"active_budget_plan_id" gorm:"index"`
+	EmailVerifiedAt    *time.Time     `json:"email_verified_at" gorm:"index"`
 	CreatedAt          time.Time      `json:"created_at"`
 	UpdatedAt          time.Time      `json:"updated_at"`
 	DeletedAt          gorm.DeletedAt `json:"-" gorm:"index"`
@@ -42,9 +43,18 @@ type RegisterRequest struct {
 
 // REGISTER RESPONSE
 type RegisterResponse struct {
-	User         UserResponse `json:"user"`
-	Token        string       `json:"token"`
-	RefreshToken string       `json:"refresh_token"`
+	User UserResponse `json:"user"`
+}
+
+// VERIFY EMAIL REQUEST PAYLOAD
+type VerifyEmailRequest struct {
+	Email string `json:"email" validate:"required,email"`
+	OTP   string `json:"otp" validate:"required,len=6,numeric"`
+}
+
+// RESEND VERIFICATION REQUEST PAYLOAD
+type ResendVerificationRequest struct {
+	Email string `json:"email" validate:"required,email"`
 }
 
 // REFRESH TOKEN REQUEST PAYLOAD

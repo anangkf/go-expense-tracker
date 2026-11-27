@@ -54,6 +54,18 @@
                             "$ref": "#/definitions/utils.Response-any"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -151,7 +163,7 @@
         },
         "/auth/register": {
             "post": {
-                "description": "Create a new user account",
+                "description": "Create a new unverified user account and email a 6 digit verification code. Tokens are issued by login after verification.",
                 "consumes": [
                     "application/json"
                 ],
@@ -188,6 +200,110 @@
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/resend-verification": {
+            "post": {
+                "description": "Send a new verification code to an unverified account. Limited by a cooldown and a daily maximum. Unknown or already verified emails get the same generic success response.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend verification OTP",
+                "parameters": [
+                    {
+                        "description": "Email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ResendVerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-email": {
+            "post": {
+                "description": "Verify the 6 digit code sent by email. The code expires and is invalidated after too many wrong attempts.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify email with OTP",
+                "parameters": [
+                    {
+                        "description": "Email and OTP",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.VerifyEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response-any"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
                         "schema": {
                             "$ref": "#/definitions/utils.Response-any"
                         }
@@ -2589,14 +2705,19 @@
         "models.RegisterResponse": {
             "type": "object",
             "properties": {
-                "refresh_token": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                },
                 "user": {
                     "$ref": "#/definitions/models.UserResponse"
+                }
+            }
+        },
+        "models.ResendVerificationRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         },
@@ -2627,6 +2748,9 @@
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "email_verified_at": {
                     "type": "string"
                 },
                 "id": {
@@ -2662,6 +2786,21 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.VerifyEmailRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
                     "type": "string"
                 }
             }

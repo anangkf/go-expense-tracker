@@ -14,6 +14,21 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Server   ServerConfig
+	Email    EmailConfig
+}
+
+type EmailConfig struct {
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUser     string
+	SMTPPassword string
+	From         string
+
+	OTPExpireMinutes       int // LIFETIME OF A VERIFICATION CODE
+	OTPMaxAttempts         int // WRONG GUESSES BEFORE THE CODE IS INVALIDATED
+	ResendCooldownSeconds  int // MINIMUM GAP BETWEEN TWO SENDS
+	ResendMaxPerDay        int // MAXIMUM SENDS PER 24H WINDOW
+	UnverifiedUserTTLHours int // UNVERIFIED ACCOUNTS OLDER THAN THIS ARE DELETED
 }
 
 type DatabaseConfig struct {
@@ -36,6 +51,7 @@ type ServerConfig struct {
 	Port               string
 	Mode               string
 	CORSAllowedOrigins []string
+	BaseURLFE          string // FRONTEND BASE URL USED IN USER FACING MESSAGES (OPTIONAL)
 }
 
 func LoadConfig() *Config {
@@ -46,6 +62,12 @@ func LoadConfig() *Config {
 
 	expireHours, _ := strconv.Atoi(getEnv("JWT_EXPIRE_HOURS", "24"))
 	refreshExpireHours, _ := strconv.Atoi(getEnv("JWT_REFRESH_EXPIRE_HOURS", "168")) //expired after 7 days
+
+	otpExpire := getEnvInt("EMAIL_OTP_EXPIRE_MINUTES", 10)
+	otpMaxAttempts := getEnvInt("EMAIL_OTP_MAX_ATTEMPTS", 5)
+	resendCooldown := getEnvInt("EMAIL_RESEND_COOLDOWN_SECONDS", 60)
+	resendMax := getEnvInt("EMAIL_RESEND_MAX_PER_DAY", 5)
+	unverifiedTTL := getEnvInt("UNVERIFIED_USER_TTL_HOURS", 168)
 
 	return &Config{
 		Database: DatabaseConfig{
@@ -66,6 +88,19 @@ func LoadConfig() *Config {
 			Port:               getEnv("SERVER_PORT", "8080"),
 			Mode:               getEnv("SERVER_MODE", "debug"),
 			CORSAllowedOrigins: splitCSV(getEnv("CORS_ALLOWED_ORIGINS", "")),
+			BaseURLFE:          strings.TrimRight(strings.TrimSpace(getEnv("BASE_URL_FE", "")), "/"),
+		},
+		Email: EmailConfig{
+			SMTPHost:               getEnv("SMTP_HOST", ""),
+			SMTPPort:               getEnv("SMTP_PORT", "587"),
+			SMTPUser:               getEnv("SMTP_USER", ""),
+			SMTPPassword:           getEnv("SMTP_PASSWORD", ""),
+			From:                   getEnv("SMTP_FROM", ""),
+			OTPExpireMinutes:       otpExpire,
+			OTPMaxAttempts:         otpMaxAttempts,
+			ResendCooldownSeconds:  resendCooldown,
+			ResendMaxPerDay:        resendMax,
+			UnverifiedUserTTLHours: unverifiedTTL,
 		},
 	}
 }
@@ -78,6 +113,14 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+// READ A POSITIVE INTEGER ENV VAR, FALLING BACK TO DEFAULT WHEN MISSING OR INVALID
+func getEnvInt(key string, defaultValue int) int {
+	if n, err := strconv.Atoi(getEnv(key, "")); err == nil && n > 0 {
+		return n
+	}
+	return defaultValue
+}
+
 // VALIDATE REQUIRED CONFIG
 func (c *Config) Validate() error {
 	if c.JWT.Secret == "" {
@@ -87,6 +130,10 @@ func (c *Config) Validate() error {
 		return errors.New("JWT_REFRESH_SECRET is required")
 	}
 
+	// SMTP IS REQUIRED IN RELEASE MODE (OTHERWISE EMAILS ARE ONLY LOGGED)
+	if c.Server.Mode == "release" && (c.Email.SMTPHost == "" || c.Email.From == "") {
+		return errors.New("SMTP_HOST and SMTP_FROM are required when SERVER_MODE=release")
+	}
 	return nil
 }
 
